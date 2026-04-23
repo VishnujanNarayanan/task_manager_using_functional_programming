@@ -62,12 +62,12 @@ object Main {
     val now = new Date()
     val today = TaskDate(now.getFullYear().toInt, now.getMonth().toInt, now.getDate().toInt)
 
-    def isToday(d: TaskDate) = d == today
-    def isPast(d: TaskDate) = 
-      d.year < today.year || 
-      (d.year == today.year && d.month < today.month) || 
-      (d.year == today.year && d.month == today.month && d.day < today.day)
-    def isFuture(d: TaskDate) = !isToday(d) && !isPast(d)
+    def isToday(t: Task) = t.date == today
+    def isPast(t: Task) = 
+      t.date.year < today.year || 
+      (t.date.year == today.year && t.date.month < today.month) || 
+      (t.date.year == today.year && t.date.month == today.month && t.date.day < today.day)
+    def isFuture(t: Task) = !isToday(t) && !isPast(t)
 
     val activeTasks = sortTasks(tasks.filter(!_.completed))
     val completedTasks = sortTasks(tasks.filter(_.completed))
@@ -159,7 +159,17 @@ object Main {
           placeholder := "Add a task...",
           controlled(value <-- titleVar, onInput.mapToValue --> titleVar),
           onKeyDown.filter(_.key == "Enter").mapToValue.filter(_.trim.nonEmpty) --> { title =>
-             // Default to Today if in Today view
+             val taskDate = if (selectedViewVar.now() == SidebarView.Today) todayDate else dateVar.now()
+             tasksVar.update(ts => addTask(ts, title, taskDate, timeVar.now(), priorityVar.now(), nextIdVar.now()))
+             nextIdVar.update(_ + 1)
+             titleVar.set("")
+          }
+        ),
+        button(
+          cls := "advanced-toggle",
+          styleAttr := "margin-right: 8px; background: #2563eb; color: white;",
+          "Add",
+          onClick.mapTo(titleVar.now()).filter(_.trim.nonEmpty) --> { title =>
              val taskDate = if (selectedViewVar.now() == SidebarView.Today) todayDate else dateVar.now()
              tasksVar.update(ts => addTask(ts, title, taskDate, timeVar.now(), priorityVar.now(), nextIdVar.now()))
              nextIdVar.update(_ + 1)
