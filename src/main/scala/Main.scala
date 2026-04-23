@@ -32,10 +32,18 @@ enum SidebarView:
 
 object Main {
   
-  // State variables (Laminar Vars holding immutable references)
-  private val tasksVar = Var(List.empty[Task])
+  // Create Today's date once for consistency
+  private val now = new Date()
+  private val todayDate = TaskDate(now.getFullYear().toInt, now.getMonth().toInt, now.getDate().toInt)
+
+  // State variables with Initial Dummy Tasks for immediate feedback
+  private val tasksVar = Var(List(
+    Task(1, "Buy groceries", todayDate, TaskTime(17, 30), Priority.High, false),
+    Task(2, "Read Scala documentation", TaskDate(todayDate.year, todayDate.month, todayDate.day + 1), TaskTime(10, 0), Priority.Medium, false)
+  ))
+  
   private val selectedViewVar = Var(SidebarView.Today)
-  private val nextIdVar = Var(1)
+  private val nextIdVar = Var(3) // Next ID after dummy tasks
 
   // --- Pure Functions (State Transformations) ---
 
@@ -53,14 +61,11 @@ object Main {
 
   // Pure function for grouping logic
   def groupTasksForView(tasks: List[Task], view: SidebarView): List[(String, List[Task])] = {
-    val now = new Date()
-    val today = TaskDate(now.getFullYear().toInt, now.getMonth().toInt, now.getDate().toInt)
-
-    def isToday(t: Task) = t.date == today
+    def isToday(t: Task) = t.date == todayDate
     def isPast(t: Task) = 
-      t.date.year < today.year || 
-      (t.date.year == today.year && t.date.month < today.month) || 
-      (t.date.year == today.year && t.date.month == today.month && t.date.day < today.day)
+      t.date.year < todayDate.year || 
+      (t.date.year == todayDate.year && t.date.month < todayDate.month) || 
+      (t.date.year == todayDate.year && t.date.month == todayDate.month && t.date.day < todayDate.day)
     def isFuture(t: Task) = !isToday(t) && !isPast(t)
 
     val activeTasks = sortTasks(tasks.filter(!_.completed))
@@ -111,7 +116,7 @@ object Main {
             children <-- tasksVar.signal.combineWith(selectedViewVar.signal).map { case (tasks, view) => 
               val groups = groupTasksForView(tasks, view)
               if (groups.isEmpty) {
-                List(div(cls := "empty-state", "No tasks here. Get started by adding one!"))
+                List(div(cls := "empty-state", "No tasks in this view. Use '+ Add task' to create one."))
               } else {
                 groups.map { case (title, ts) =>
                   div(
@@ -146,14 +151,11 @@ object Main {
     val isAddingVar = Var(false)
     val titleVar = Var("")
     val priorityVar = Var(Priority.Medium)
-    
-    val now = new Date()
-    val todayDate = TaskDate(now.getFullYear().toInt, now.getMonth().toInt, now.getDate().toInt)
     val dateVar = Var(todayDate)
     val timeVar = Var(TaskTime(9, 0))
 
     div(cls := "quick-add-container",
-      // Trigger
+      // Trigger Button
       div(
         cls := "add-task-trigger",
         display <-- isAddingVar.signal.map(if (_) "none" else "flex"),
@@ -171,8 +173,14 @@ object Main {
           placeholder := "Task name",
           controlled(value <-- titleVar, onInput.mapToValue --> titleVar),
           onKeyDown.filter(_.key == "Enter") --> { _ => 
-            // Trigger add on Enter
-            dom.document.getElementById("submit-task-btn").asInstanceOf[dom.html.Button].click()
+             // Logic repeated for Enter key
+             val title = titleVar.now().trim
+             if (title.nonEmpty) {
+               tasksVar.update(ts => addTask(ts, title, dateVar.now(), timeVar.now(), priorityVar.now(), nextIdVar.now()))
+               nextIdVar.update(_ + 1)
+               titleVar.set("")
+               isAddingVar.set(false)
+             }
           }
         ),
         div(cls := "advanced-options",
@@ -217,6 +225,7 @@ object Main {
         ),
         div(cls := "add-task-actions",
           button(
+            typ := "button",
             cls := "btn-cancel", 
             "Cancel", 
             onClick --> { _ => 
@@ -225,16 +234,15 @@ object Main {
             }
           ),
           button(
-            idAttr := "submit-task-btn",
+            typ := "button",
             cls := "btn-submit", 
             "Add Task", 
             disabled <-- titleVar.signal.map(_.trim.isEmpty),
             onClick --> { _ =>
-              val title = titleVar.now()
-              if (title.trim.nonEmpty) {
-                // Fixed: Correct evaluation of all state at click time
-                val currentTaskDate = if (selectedViewVar.now() == SidebarView.Today && dateVar.now() == todayDate) todayDate else dateVar.now()
-                tasksVar.update(ts => addTask(ts, title, currentTaskDate, timeVar.now(), priorityVar.now(), nextIdVar.now()))
+              val title = titleVar.now().trim
+              if (title.nonEmpty) {
+                // Guaranteed robust addition
+                tasksVar.update(ts => addTask(ts, title, dateVar.now(), timeVar.now(), priorityVar.now(), nextIdVar.now()))
                 nextIdVar.update(_ + 1)
                 titleVar.set("")
                 isAddingVar.set(false)
@@ -267,6 +275,7 @@ object Main {
       ),
       div(cls := "task-actions",
         button(
+          typ := "button",
           cls := "delete-action",
           "Delete",
           onClick --> { _ => tasksVar.update(ts => deleteTask(ts, task.id)) }
