@@ -28,7 +28,7 @@ case class Task(
 )
 
 enum SidebarView:
-  case Inbox, Today, Upcoming, Completed, HighPriority
+  case Tasks, Pending, Completed, HighPriority, MediumPriority, LowPriority
 
 object Main {
   
@@ -42,7 +42,7 @@ object Main {
     Task(2, "Read Scala documentation", TaskDate(todayDate.year, todayDate.month, todayDate.day + 1), TaskTime(10, 0), Priority.Medium, false)
   ))
   
-  private val selectedViewVar = Var(SidebarView.Today)
+  private val selectedViewVar = Var(SidebarView.Tasks)
   private val nextIdVar = Var(3) // Next ID after dummy tasks
 
   // --- Pure Functions (State Transformations) ---
@@ -71,19 +71,23 @@ object Main {
     val activeTasks = sortTasks(tasks.filter(!_.completed))
     val completedTasks = sortTasks(tasks.filter(_.completed))
 
-    val result = view match {
-      case SidebarView.Inbox =>
-        List("Overdue" -> activeTasks.filter(isPast), "Today" -> activeTasks.filter(isToday), "Upcoming" -> activeTasks.filter(isFuture))
-      case SidebarView.Today =>
-        List("Overdue" -> activeTasks.filter(isPast), "Today" -> activeTasks.filter(isToday))
-      case SidebarView.Upcoming =>
-        List("Upcoming" -> activeTasks.filter(isFuture))
+    view match {
+      case SidebarView.Tasks | SidebarView.Pending =>
+        List(
+          "Overdue" -> activeTasks.filter(isPast), 
+          "Today" -> activeTasks.filter(isToday), 
+          "Upcoming" -> activeTasks.filter(isFuture)
+        )
       case SidebarView.Completed =>
         List("Completed" -> completedTasks)
       case SidebarView.HighPriority =>
         List("High Priority" -> activeTasks.filter(_.priority == Priority.High))
+      case SidebarView.MediumPriority =>
+        List("Medium Priority" -> activeTasks.filter(_.priority == Priority.Medium))
+      case SidebarView.LowPriority =>
+        List("Low Priority" -> activeTasks.filter(_.priority == Priority.Low))
     }
-    result.filter(_._2.nonEmpty)
+    .filter(_._2.nonEmpty)
   }
 
   def main(args: Array[String]): Unit = {
@@ -97,16 +101,25 @@ object Main {
     div(cls := "app-container",
       // Left Sidebar
       div(cls := "sidebar",
-        renderSidebarItem("Inbox", SidebarView.Inbox),
-        renderSidebarItem("Today", SidebarView.Today),
-        renderSidebarItem("Upcoming", SidebarView.Upcoming),
+        renderSidebarItem("Tasks", SidebarView.Tasks),
+        renderSidebarItem("Pending", SidebarView.Pending),
         renderSidebarItem("Completed", SidebarView.Completed),
-        renderSidebarItem("High Priority", SidebarView.HighPriority)
+        div(styleAttr := "margin-top: 20px; padding: 0 12px; font-size: 0.75rem; font-weight: 700; color: #9ca3af; text-transform: uppercase;", "Priority"),
+        renderSidebarItem("High Priority", SidebarView.HighPriority),
+        renderSidebarItem("Medium Priority", SidebarView.MediumPriority),
+        renderSidebarItem("Low Priority", SidebarView.LowPriority)
       ),
       // Main Content Area
       div(cls := "main-content",
         div(cls := "content-inner",
-          h1(cls := "view-title", child.text <-- selectedViewVar.signal.map(_.toString)),
+          h1(cls := "view-title", child.text <-- selectedViewVar.signal.map {
+            case SidebarView.Tasks => "All Tasks"
+            case SidebarView.Pending => "Pending Tasks"
+            case SidebarView.Completed => "Completed Tasks"
+            case SidebarView.HighPriority => "High Priority"
+            case SidebarView.MediumPriority => "Medium Priority"
+            case SidebarView.LowPriority => "Low Priority"
+          }),
           
           // Dynamic Quick Add
           renderQuickAdd(),
@@ -116,7 +129,7 @@ object Main {
             children <-- tasksVar.signal.combineWith(selectedViewVar.signal).map { case (tasks, view) => 
               val groups = groupTasksForView(tasks, view)
               if (groups.isEmpty) {
-                List(div(cls := "empty-state", "No tasks in this view. Use '+ Add task' to create one."))
+                List(div(cls := "empty-state", "No tasks here. Add a new task to get started!"))
               } else {
                 groups.map { case (title, ts) =>
                   div(
@@ -173,13 +186,16 @@ object Main {
           placeholder := "Task name",
           controlled(value <-- titleVar, onInput.mapToValue --> titleVar),
           onKeyDown.filter(_.key == "Enter") --> { _ => 
-             // Logic repeated for Enter key
              val title = titleVar.now().trim
              if (title.nonEmpty) {
                tasksVar.update(ts => addTask(ts, title, dateVar.now(), timeVar.now(), priorityVar.now(), nextIdVar.now()))
                nextIdVar.update(_ + 1)
                titleVar.set("")
                isAddingVar.set(false)
+               // Automatically switch to Tasks or Pending view to show the new task
+               if (selectedViewVar.now() == SidebarView.Completed) {
+                 selectedViewVar.set(SidebarView.Tasks)
+               }
              }
           }
         ),
@@ -241,11 +257,14 @@ object Main {
             onClick --> { _ =>
               val title = titleVar.now().trim
               if (title.nonEmpty) {
-                // Guaranteed robust addition
                 tasksVar.update(ts => addTask(ts, title, dateVar.now(), timeVar.now(), priorityVar.now(), nextIdVar.now()))
                 nextIdVar.update(_ + 1)
                 titleVar.set("")
                 isAddingVar.set(false)
+                // Automatically switch to Tasks or Pending view to show the new task
+                if (selectedViewVar.now() == SidebarView.Completed) {
+                  selectedViewVar.set(SidebarView.Tasks)
+                }
               }
             }
           )
