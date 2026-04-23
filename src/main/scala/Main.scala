@@ -38,8 +38,8 @@ object Main {
 
   // State variables with Initial Dummy Tasks for immediate feedback
   private val tasksVar = Var(List(
-    Task(1, "Buy groceries", todayDate, TaskTime(17, 30), Priority.High, false),
-    Task(2, "Read Scala documentation", TaskDate(todayDate.year, todayDate.month, todayDate.day + 1), TaskTime(10, 0), Priority.Medium, false)
+    Task(1, "Welcome to your Planner! Click me to complete", todayDate, TaskTime(9, 0), Priority.High, false),
+    Task(2, "Add your first task using the button above", TaskDate(todayDate.year, todayDate.month, todayDate.day + 1), TaskTime(10, 0), Priority.Medium, false)
   ))
   
   private val selectedViewVar = Var(SidebarView.Tasks)
@@ -167,6 +167,28 @@ object Main {
     val dateVar = Var(todayDate)
     val timeVar = Var(TaskTime(9, 0))
 
+    // Robust local function to handle task submission
+    def submitNewTask(): Unit = {
+      val title = titleVar.now().trim
+      if (title.nonEmpty) {
+        // Capture values now to ensure absolute consistency
+        val date = dateVar.now()
+        val time = timeVar.now()
+        val priority = priorityVar.now()
+        val id = nextIdVar.now()
+
+        tasksVar.update(ts => addTask(ts, title, date, time, priority, id))
+        nextIdVar.update(_ + 1)
+        
+        // Reset local form state
+        titleVar.set("")
+        isAddingVar.set(false)
+        
+        // Ensure immediate visibility by switching to "Tasks" view
+        selectedViewVar.set(SidebarView.Tasks)
+      }
+    }
+
     div(cls := "quick-add-container",
       // Trigger Button
       div(
@@ -185,19 +207,7 @@ object Main {
           cls := "quick-add-input",
           placeholder := "Task name",
           controlled(value <-- titleVar, onInput.mapToValue --> titleVar),
-          onKeyDown.filter(_.key == "Enter") --> { _ => 
-             val title = titleVar.now().trim
-             if (title.nonEmpty) {
-               tasksVar.update(ts => addTask(ts, title, dateVar.now(), timeVar.now(), priorityVar.now(), nextIdVar.now()))
-               nextIdVar.update(_ + 1)
-               titleVar.set("")
-               isAddingVar.set(false)
-               // Automatically switch to Tasks or Pending view to show the new task
-               if (selectedViewVar.now() == SidebarView.Completed) {
-                 selectedViewVar.set(SidebarView.Tasks)
-               }
-             }
-          }
+          onKeyDown.filter(_.key == "Enter") --> { _ => submitNewTask() }
         ),
         div(cls := "advanced-options",
           div(cls := "option-field",
@@ -244,7 +254,7 @@ object Main {
             typ := "button",
             cls := "btn-cancel", 
             "Cancel", 
-            onClick --> { _ => 
+            onClick.stopImmediatePropagation --> { _ => 
               isAddingVar.set(false)
               titleVar.set("") 
             }
@@ -254,19 +264,7 @@ object Main {
             cls := "btn-submit", 
             "Add Task", 
             disabled <-- titleVar.signal.map(_.trim.isEmpty),
-            onClick --> { _ =>
-              val title = titleVar.now().trim
-              if (title.nonEmpty) {
-                tasksVar.update(ts => addTask(ts, title, dateVar.now(), timeVar.now(), priorityVar.now(), nextIdVar.now()))
-                nextIdVar.update(_ + 1)
-                titleVar.set("")
-                isAddingVar.set(false)
-                // Automatically switch to Tasks or Pending view to show the new task
-                if (selectedViewVar.now() == SidebarView.Completed) {
-                  selectedViewVar.set(SidebarView.Tasks)
-                }
-              }
-            }
+            onClick --> { _ => submitNewTask() }
           )
         )
       )
@@ -277,17 +275,20 @@ object Main {
     div(
       cls := "task-row",
       cls.toggle("completed") := task.completed,
+      // Entire body click toggles completion
+      styleAttr := "cursor: pointer;",
+      onClick.stopImmediatePropagation --> { _ => tasksVar.update(ts => toggleTask(ts, task.id)) },
+      
       div(cls := "task-checkbox-wrapper",
         input(
           typ := "checkbox",
           cls := "task-checkbox",
           checked := task.completed,
-          onInput.mapToChecked --> { _ => tasksVar.update(ts => toggleTask(ts, task.id)) }
+          // Prevent double-toggle by stopping propagation when checkbox itself is clicked
+          onClick.stopImmediatePropagation --> { _ => tasksVar.update(ts => toggleTask(ts, task.id)) }
         )
       ),
       div(cls := "task-body",
-        styleAttr := "cursor: pointer;",
-        onClick --> { _ => tasksVar.update(ts => toggleTask(ts, task.id)) },
         div(cls := "task-title", task.title),
         div(cls := "task-meta",
           span(cls := s"priority-label priority-${task.priority.toString.toLowerCase}", task.priority.toString),
@@ -299,7 +300,8 @@ object Main {
           typ := "button",
           cls := "delete-action",
           "Delete",
-          onClick --> { _ => tasksVar.update(ts => deleteTask(ts, task.id)) }
+          // Stop propagation to prevent toggling when clicking Delete
+          onClick.stopImmediatePropagation --> { _ => tasksVar.update(ts => deleteTask(ts, task.id)) }
         )
       )
     )
