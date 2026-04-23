@@ -58,11 +58,12 @@ object Main {
   def filterTasksForView(tasks: List[Task], view: SidebarView): List[Task] = {
     val sorted = sortTasks(tasks)
     view match {
-      case SidebarView.Tasks | SidebarView.Pending => sorted.filter(!_.completed)
-      case SidebarView.Completed => sorted.filter(_.completed)
-      case SidebarView.HighPriority => sorted.filter(t => !t.completed && t.priority == Priority.High)
+      case SidebarView.Tasks          => sorted // Show all tasks (completed + pending)
+      case SidebarView.Pending        => sorted.filter(!_.completed)
+      case SidebarView.Completed      => sorted.filter(_.completed)
+      case SidebarView.HighPriority   => sorted.filter(t => !t.completed && t.priority == Priority.High)
       case SidebarView.MediumPriority => sorted.filter(t => !t.completed && t.priority == Priority.Medium)
-      case SidebarView.LowPriority => sorted.filter(t => !t.completed && t.priority == Priority.Low)
+      case SidebarView.LowPriority    => sorted.filter(t => !t.completed && t.priority == Priority.Low)
     }
   }
 
