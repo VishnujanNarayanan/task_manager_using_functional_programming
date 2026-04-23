@@ -7,9 +7,9 @@ echo "Setting up environment..."
 curl -fL https://github.com/coursier/coursier/releases/latest/download/cs-x86_64-pc-linux.gz | gzip -d > cs
 chmod +x cs
 
-# Install sbt (using the --apps flag and adding it to PATH)
-./cs setup --yes --apps sbt
-export PATH="$PATH:$HOME/.local/share/coursier/bin"
+# Install sbt non-interactively to a local bin directory
+./cs install sbt --install-dir ./bin
+export PATH="$PATH:$PWD/bin"
 
 echo "Building production bundle..."
 sbt fullLinkJS
