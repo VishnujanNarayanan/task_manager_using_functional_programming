@@ -59,10 +59,10 @@ object Main {
     }
 
   def main(args: Array[String]): Unit = {
-    documentEvents.onDomContentLoaded.foreach { _ =>
+    dom.document.addEventListener("DOMContentLoaded", { (_: dom.Event) =>
       val appContainer = dom.document.getElementById("app")
       render(appContainer, appElement())
-    }(unsafeWindowOwner)
+    })
   }
 
   def appElement(): HtmlElement = {
