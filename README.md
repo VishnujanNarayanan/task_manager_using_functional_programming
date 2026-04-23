@@ -1,69 +1,67 @@
-# Functional Task Manager in Scala.js
+# Productivity Planner in Scala.js
 
-## What It Does
+This is a professional, frontend-only productivity web application built using **Scala.js** and **Laminar**. It transforms a simple task list into a modern planner with advanced sorting, filtering, and searching capabilities, all while strictly adhering to functional programming principles.
 
-This is a complete, frontend-only Task Manager web application built using Scala and compiled to JavaScript via Scala.js. It allows users to add tasks, mark them as complete, delete them, and filter by their status. The application functions entirely in the browser and requires no backend server.
+## Functional Programming Usage
+
+The centerpiece of this project is its rigorous application of Scala's functional programming features. By leveraging the **Laminar** reactive UI library, the application maintains a unidirectional data flow that is both predictable and robust.
+
+### 1. Immutability & Case Classes
+The entire state of the application is modeled using immutable **Case Classes**.
+```scala
+case class Task(id: Int, title: String, date: TaskDate, time: TaskTime, priority: Priority, completed: Boolean)
+```
+Every interaction with the state results in a new instance of the data model rather than a mutation. This ensures that the application state is always consistent and easy to reason about.
+
+### 2. Pure Functions
+All business logic is encapsulated in **Pure Functions**. These functions take the current state and parameters as input and return a new state without any side effects.
+*   `addTask`: Generates a new task list with the added entry.
+*   `toggleTask`: Returns a list with the completion status of a specific task flipped.
+*   `filterTasks` & `searchTasks`: Derive view-specific lists based on criteria.
+*   `sortTasks`: Chronologically orders tasks by date and time.
+
+### 3. Higher-Order Functions
+The application relies heavily on standard Scala collection transformations:
+*   **`map`**: Used to transform the task list and project signals for the UI.
+*   **`filter`**: Used for the robust search and filtering system.
+*   **`foldLeft`**: Specifically used in `calculateStats` to derive Total, Pending, and Completed counts in a single pass over the data.
+*   **`partition`**: Used to separate completed and active tasks for section grouping.
+
+### 4. Pattern Matching
+Used extensively to handle logic switching in a type-safe manner, particularly for the **FilterMode** ADT and for grouping tasks into dynamic sections ("Today", "Upcoming", "Completed").
 
 ## Features
 
-*   **Add Tasks**: Create new tasks using the input field.
-*   **Toggle Completion**: Mark tasks as complete or pending.
-*   **Delete Tasks**: Remove individual tasks from the list.
-*   **Filter Tasks**: View all tasks, only pending tasks, or only completed tasks.
-*   **Clear Completed**: Remove all completed tasks with a single click.
-*   **Statistics**: View total, pending, and completed task counts.
-*   **Responsive UI**: Clean, modern, and minimal design.
-
-## Functional Programming Concepts Used
-
-*   **Immutability**: State is updated by returning entirely new structures rather than mutating variables in place.
-*   **Pure Functions**: Functions like `addTask`, `deleteTask`, `toggleTask`, `clearCompleted`, and `filterTasks` are strictly pure.
-*   **Higher-Order Functions**: The application demonstrates explicit usage of:
-    *   `map`
-    *   `filter` (and `filterNot`)
-    *   `foldLeft` (used to compute task statistics)
-    *   `find` (used to query specific tasks)
-*   **Case Classes**: Used to model the immutable `Task` entity.
-*   **Pattern Matching**: Used within `filterTasks` to cleanly match against the ADT filter states (`All`, `Pending`, `Completed`).
+*   **Advanced Task Creation**: Support for Title, Priority, Date, and Time.
+*   **Dual-Input Date System**: Sync between a visual Calendar Picker and manual dropdown selectors.
+*   **Chronological Sorting**: Tasks are automatically ordered by their proximity in time.
+*   **Dynamic Grouping**: Tasks are categorized into Today, Upcoming, and Completed sections.
+*   **Live Search & Filters**: Instant title search and filtering by status or High Priority.
+*   **Responsive Modern UI**: A clean, card-based layout inspired by Todoist and Notion.
 
 ## Local Run
 
-To build and run the project locally on your machine, execute the exact following commands:
+To build and run the project locally:
 
 ```bash
 # 1. Compile the Scala.js code
 sbt fastLinkJS
 
-# 2. Copy the compiled JS file to the public directory
+# 2. Copy the compiled JS to the public directory
 cp target/scala-3.3.3/functional-task-manager-fastopt/main.js public/
 
-# 3. Open the public/index.html file in your browser
-open public/index.html   # (macOS)
-xdg-open public/index.html # (Linux)
+# 3. Open the application
+open public/index.html
 ```
-*(Alternatively, you can just manually drag and drop `public/index.html` into your web browser after step 2).*
 
 ## Deploy to Vercel
 
-This repository is designed for fully automated deployment to Vercel directly from GitHub.
-
-**Exact steps:**
-
-1. **Push to GitHub:** Commit all files and push this project repository to GitHub.
-2. **Import repo in Vercel:** Go to your Vercel dashboard, click "Add New... Project", and import your GitHub repository.
-3. **Build command:** In the project settings during setup, ensure the **Build Command** is set to:
-   ```bash
-   bash build.sh
-   ```
-4. **Output directory:** Ensure the **Output Directory** is set to:
-   ```text
-   public
-   ```
-   *(Note: The provided `vercel.json` already defines this configuration natively).*
-
-Vercel will run `build.sh` (which downloads Scala/sbt, compiles the production JS bundle via `sbt fullLinkJS`, and moves the JS file to `public/`) and then serve the `public/` folder natively. No manual post-processing is required.
+This repository is optimized for **Vercel**.
+1. Push the code to GitHub.
+2. Import the repository into Vercel.
+3. Vercel will automatically detect the `vercel.json` and use `build.sh` to install Scala/sbt and generate the production bundle.
 
 ## Screenshots Placeholder
 
-![Main Application View](placeholder-main-view.png)
-![Filtered View](placeholder-filtered-view.png)
+![Main Planner View](placeholder-planner-view.png)
+![Task Creation Form](placeholder-form-view.png)
