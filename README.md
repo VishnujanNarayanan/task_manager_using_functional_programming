@@ -30,8 +30,4 @@ Pattern matching is used to type-safely handle the algebraic data types (ADTs) r
 *   **Chronological Sorting**: Tasks automatically sort by nearest date and time.
 *   **Dynamic Views**: Filter tasks by All, Pending, Completed, or specific Priority levels.
 *   **Reactive UI**: Built with Laminar for seamless, state-driven updates.
-*   **Modern Design**: Clean, responsive layout with intuitive interactions.
-
-## Deployment (Vercel)
-
-This project is configured for seamless deployment on Vercel. Connect the GitHub repository to Vercel, and it will automatically use `vercel.json` and `build.sh` to compile and serve the application from the `public` directory.
+*   **Modern Design**: Clean, responsive layout.
