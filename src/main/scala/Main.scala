@@ -71,7 +71,7 @@ object Main {
     val activeTasks = sortTasks(tasks.filter(!_.completed))
     val completedTasks = sortTasks(tasks.filter(_.completed))
 
-    view match {
+    val result = view match {
       case SidebarView.Tasks | SidebarView.Pending =>
         List(
           "Overdue" -> activeTasks.filter(isPast), 
@@ -87,7 +87,7 @@ object Main {
       case SidebarView.LowPriority =>
         List("Low Priority" -> activeTasks.filter(_.priority == Priority.Low))
     }
-    .filter(_._2.nonEmpty)
+    result.filter(_._2.nonEmpty)
   }
 
   def main(args: Array[String]): Unit = {
@@ -286,6 +286,8 @@ object Main {
         )
       ),
       div(cls := "task-body",
+        styleAttr := "cursor: pointer;",
+        onClick --> { _ => tasksVar.update(ts => toggleTask(ts, task.id)) },
         div(cls := "task-title", task.title),
         div(cls := "task-meta",
           span(cls := s"priority-label priority-${task.priority.toString.toLowerCase}", task.priority.toString),
