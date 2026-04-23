@@ -1,6 +1,6 @@
 # Functional Task Manager (Scala.js)
 
-[Try the application here](https://task-manager-using-functional-progr.vercel.app/)
+### 🚀 [Live Demo: Try the Application Here](https://task-manager-using-functional-progr.vercel.app/)
 
 A professional, frontend-only productivity web application built using Scala.js and Laminar. This project transforms a basic task list into a modern planner, demonstrating the practical application of functional programming paradigms in a reactive UI architecture.
 
@@ -32,19 +32,6 @@ Pattern matching is used to type-safely handle the algebraic data types (ADTs) r
 *   **Reactive UI**: Built with Laminar for seamless, state-driven updates.
 *   **Modern Design**: Clean, responsive layout with intuitive interactions.
 
-## Run / Deploy
+## Deployment (Vercel)
 
-### Local Development
-```bash
-# Compile the Scala.js code
-sbt fastLinkJS
-
-# Copy the compiled JS to the public directory
-cp target/scala-3.3.3/functional-task-manager-fastopt/main.js public/
-
-# Open the application
-open public/index.html
-```
-
-### Deployment (Vercel)
 This project is configured for seamless deployment on Vercel. Connect the GitHub repository to Vercel, and it will automatically use `vercel.json` and `build.sh` to compile and serve the application from the `public` directory.
