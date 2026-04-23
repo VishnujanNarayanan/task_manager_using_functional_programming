@@ -32,20 +32,16 @@ enum SidebarView:
 
 object Main {
   
-  // Create Today's date once for consistency
   private val now = new Date()
   private val todayDate = TaskDate(now.getFullYear().toInt, now.getMonth().toInt, now.getDate().toInt)
 
-  // State variables with Initial Dummy Tasks for immediate feedback
   private val tasksVar = Var(List(
     Task(1, "Welcome to your Planner! Click me to complete", todayDate, TaskTime(9, 0), Priority.High, false),
     Task(2, "Add your first task using the button above", TaskDate(todayDate.year, todayDate.month, todayDate.day + 1), TaskTime(10, 0), Priority.Medium, false)
   ))
   
   private val selectedViewVar = Var(SidebarView.Tasks)
-  private val nextIdVar = Var(3) // Next ID after dummy tasks
-
-  // --- Pure Functions (State Transformations) ---
+  private val nextIdVar = Var(3)
 
   def addTask(tasks: List[Task], title: String, date: TaskDate, time: TaskTime, priority: Priority, id: Int): List[Task] =
     tasks :+ Task(id, title.trim, date, time, priority, completed = false)
@@ -59,35 +55,15 @@ object Main {
   def sortTasks(tasks: List[Task]): List[Task] =
     tasks.sortBy(t => (t.date.year, t.date.month, t.date.day, t.time.hour, t.time.minute))
 
-  // Pure function for grouping logic
-  def groupTasksForView(tasks: List[Task], view: SidebarView): List[(String, List[Task])] = {
-    def isToday(t: Task) = t.date == todayDate
-    def isPast(t: Task) = 
-      t.date.year < todayDate.year || 
-      (t.date.year == todayDate.year && t.date.month < todayDate.month) || 
-      (t.date.year == todayDate.year && t.date.month == todayDate.month && t.date.day < todayDate.day)
-    def isFuture(t: Task) = !isToday(t) && !isPast(t)
-
-    val activeTasks = sortTasks(tasks.filter(!_.completed))
-    val completedTasks = sortTasks(tasks.filter(_.completed))
-
-    val result = view match {
-      case SidebarView.Tasks | SidebarView.Pending =>
-        List(
-          "Overdue" -> activeTasks.filter(isPast), 
-          "Today" -> activeTasks.filter(isToday), 
-          "Upcoming" -> activeTasks.filter(isFuture)
-        )
-      case SidebarView.Completed =>
-        List("Completed" -> completedTasks)
-      case SidebarView.HighPriority =>
-        List("High Priority" -> activeTasks.filter(_.priority == Priority.High))
-      case SidebarView.MediumPriority =>
-        List("Medium Priority" -> activeTasks.filter(_.priority == Priority.Medium))
-      case SidebarView.LowPriority =>
-        List("Low Priority" -> activeTasks.filter(_.priority == Priority.Low))
+  def filterTasksForView(tasks: List[Task], view: SidebarView): List[Task] = {
+    val sorted = sortTasks(tasks)
+    view match {
+      case SidebarView.Tasks | SidebarView.Pending => sorted.filter(!_.completed)
+      case SidebarView.Completed => sorted.filter(_.completed)
+      case SidebarView.HighPriority => sorted.filter(t => !t.completed && t.priority == Priority.High)
+      case SidebarView.MediumPriority => sorted.filter(t => !t.completed && t.priority == Priority.Medium)
+      case SidebarView.LowPriority => sorted.filter(t => !t.completed && t.priority == Priority.Low)
     }
-    result.filter(_._2.nonEmpty)
   }
 
   def main(args: Array[String]): Unit = {
@@ -99,7 +75,6 @@ object Main {
 
   def appElement(): HtmlElement = {
     div(cls := "app-container",
-      // Left Sidebar
       div(cls := "sidebar",
         renderSidebarItem("Tasks", SidebarView.Tasks),
         renderSidebarItem("Pending", SidebarView.Pending),
@@ -109,7 +84,6 @@ object Main {
         renderSidebarItem("Medium Priority", SidebarView.MediumPriority),
         renderSidebarItem("Low Priority", SidebarView.LowPriority)
       ),
-      // Main Content Area
       div(cls := "main-content",
         div(cls := "content-inner",
           h1(cls := "view-title", child.text <-- selectedViewVar.signal.map {
@@ -121,27 +95,20 @@ object Main {
             case SidebarView.LowPriority => "Low Priority"
           }),
           
-          // Dynamic Quick Add
           renderQuickAdd(),
 
-          // Grouped Task List with Empty State
           div(
+            h3(cls := "group-title", "Task List"),
             children <-- tasksVar.signal.combineWith(selectedViewVar.signal).map { case (tasks, view) => 
-              val groups = groupTasksForView(tasks, view)
-              if (groups.isEmpty) {
+              val filtered = filterTasksForView(tasks, view)
+              if (filtered.isEmpty) {
                 List(div(cls := "empty-state", "No tasks here. Add a new task to get started!"))
               } else {
-                groups.map { case (title, ts) =>
-                  div(
-                    h3(cls := "group-title", title),
-                    div(ts.map(renderTaskRow))
-                  )
-                }
+                filtered.map(renderTaskRow)
               }
             }
           ),
 
-          // Stats Summary
           div(cls := "stats-summary",
             div(cls := "stat-box", "Total: ", strong(child.text <-- tasksVar.signal.map(_.length.toString))),
             div(cls := "stat-box", "Pending: ", strong(child.text <-- tasksVar.signal.map(_.count(!_.completed).toString)))
@@ -167,11 +134,17 @@ object Main {
     val dateVar = Var(todayDate)
     val timeVar = Var(TaskTime(9, 0))
 
-    // Robust local function to handle task submission
+    def resetForm(): Unit = {
+      titleVar.set("")
+      priorityVar.set(Priority.Medium)
+      dateVar.set(todayDate)
+      timeVar.set(TaskTime(9, 0))
+      isAddingVar.set(false)
+    }
+
     def submitNewTask(): Unit = {
       val title = titleVar.now().trim
       if (title.nonEmpty) {
-        // Capture values now to ensure absolute consistency
         val date = dateVar.now()
         val time = timeVar.now()
         val priority = priorityVar.now()
@@ -180,17 +153,12 @@ object Main {
         tasksVar.update(ts => addTask(ts, title, date, time, priority, id))
         nextIdVar.update(_ + 1)
         
-        // Reset local form state
-        titleVar.set("")
-        isAddingVar.set(false)
-        
-        // Ensure immediate visibility by switching to "Tasks" view
+        resetForm()
         selectedViewVar.set(SidebarView.Tasks)
       }
     }
 
     div(cls := "quick-add-container",
-      // Trigger Button
       div(
         cls := "add-task-trigger",
         display <-- isAddingVar.signal.map(if (_) "none" else "flex"),
@@ -198,51 +166,45 @@ object Main {
         span(cls := "add-task-icon", "+"),
         span("Add task")
       ),
-      // Expanded Form
-      div(
+      form(
         cls := "add-task-form",
         display <-- isAddingVar.signal.map(if (_) "block" else "none"),
+        onSubmit.preventDefault --> { _ => submitNewTask() },
         input(
           typ := "text",
           cls := "quick-add-input",
           placeholder := "Task name",
-          controlled(value <-- titleVar, onInput.mapToValue --> titleVar),
-          onKeyDown.filter(_.key == "Enter") --> { _ => submitNewTask() }
+          value <-- titleVar,
+          onInput.mapToValue --> titleVar
         ),
         div(cls := "advanced-options",
           div(cls := "option-field",
             label("Date"),
             input(
               typ := "date",
-              controlled(
-                value <-- dateVar.signal.map(_.toIsoString),
-                onChange.mapToValue --> { v =>
-                  val p = v.split("-")
-                  if (p.length == 3) dateVar.set(TaskDate(p(0).toInt, p(1).toInt - 1, p(2).toInt))
-                }
-              )
+              value <-- dateVar.signal.map(_.toIsoString),
+              onInput.mapToValue --> { v =>
+                val p = v.split("-")
+                if (p.length == 3) dateVar.set(TaskDate(p(0).toInt, p(1).toInt - 1, p(2).toInt))
+              }
             )
           ),
           div(cls := "option-field",
             label("Time"),
             input(
               typ := "time",
-              controlled(
-                value <-- timeVar.signal.map(_.toDisplayString),
-                onChange.mapToValue --> { v =>
-                  val p = v.split(":")
-                  if (p.length == 2) timeVar.set(TaskTime(p(0).toInt, p(1).toInt))
-                }
-              )
+              value <-- timeVar.signal.map(_.toDisplayString),
+              onInput.mapToValue --> { v =>
+                val p = v.split(":")
+                if (p.length == 2) timeVar.set(TaskTime(p(0).toInt, p(1).toInt))
+              }
             )
           ),
           div(cls := "option-field",
             label("Priority"),
             select(
-              controlled(
-                value <-- priorityVar.signal.map(_.toString),
-                onChange.mapToValue --> { v => priorityVar.set(Priority.valueOf(v)) }
-              ),
+              value <-- priorityVar.signal.map(_.toString),
+              onChange.mapToValue --> { v => priorityVar.set(Priority.valueOf(v)) },
               option(value := "High", "High"),
               option(value := "Medium", "Medium"),
               option(value := "Low", "Low")
@@ -254,17 +216,13 @@ object Main {
             typ := "button",
             cls := "btn-cancel", 
             "Cancel", 
-            onClick.stopImmediatePropagation --> { _ => 
-              isAddingVar.set(false)
-              titleVar.set("") 
-            }
+            onClick --> { _ => resetForm() }
           ),
           button(
-            typ := "button",
+            typ := "submit",
             cls := "btn-submit", 
             "Add Task", 
-            disabled <-- titleVar.signal.map(_.trim.isEmpty),
-            onClick --> { _ => submitNewTask() }
+            disabled <-- titleVar.signal.map(_.trim.isEmpty)
           )
         )
       )
@@ -275,17 +233,15 @@ object Main {
     div(
       cls := "task-row",
       cls.toggle("completed") := task.completed,
-      // Entire body click toggles completion
       styleAttr := "cursor: pointer;",
-      onClick.stopImmediatePropagation --> { _ => tasksVar.update(ts => toggleTask(ts, task.id)) },
+      onClick --> { _ => tasksVar.update(ts => toggleTask(ts, task.id)) },
       
       div(cls := "task-checkbox-wrapper",
         input(
           typ := "checkbox",
           cls := "task-checkbox",
           checked := task.completed,
-          // Prevent double-toggle by stopping propagation when checkbox itself is clicked
-          onClick.stopImmediatePropagation --> { _ => tasksVar.update(ts => toggleTask(ts, task.id)) }
+          onClick.stopPropagation --> { _ => tasksVar.update(ts => toggleTask(ts, task.id)) }
         )
       ),
       div(cls := "task-body",
@@ -300,8 +256,7 @@ object Main {
           typ := "button",
           cls := "delete-action",
           "Delete",
-          // Stop propagation to prevent toggling when clicking Delete
-          onClick.stopImmediatePropagation --> { _ => tasksVar.update(ts => deleteTask(ts, task.id)) }
+          onClick.stopPropagation --> { _ => tasksVar.update(ts => deleteTask(ts, task.id)) }
         )
       )
     )

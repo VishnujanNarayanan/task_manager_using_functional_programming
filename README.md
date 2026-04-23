@@ -1,67 +1,50 @@
-# Productivity Planner in Scala.js
+# Functional Task Manager (Scala.js)
 
-This is a professional, frontend-only productivity web application built using **Scala.js** and **Laminar**. It transforms a simple task list into a modern planner with advanced sorting, filtering, and searching capabilities, all while strictly adhering to functional programming principles.
+[Try the application here](https://task-manager-using-functional-progr.vercel.app/)
+
+A professional, frontend-only productivity web application built using Scala.js and Laminar. This project transforms a basic task list into a modern planner, demonstrating the practical application of functional programming paradigms in a reactive UI architecture.
 
 ## Functional Programming Usage
 
-The centerpiece of this project is its rigorous application of Scala's functional programming features. By leveraging the **Laminar** reactive UI library, the application maintains a unidirectional data flow that is both predictable and robust.
+This project strictly adheres to functional programming principles to manage state and business logic in a robust, predictable manner. The core architecture relies on unidirectional data flow, separating state transformations from UI rendering.
 
-### 1. Immutability & Case Classes
-The entire state of the application is modeled using immutable **Case Classes**.
-```scala
-case class Task(id: Int, title: String, date: TaskDate, time: TaskTime, priority: Priority, completed: Boolean)
-```
-Every interaction with the state results in a new instance of the data model rather than a mutation. This ensures that the application state is always consistent and easy to reason about.
+### Immutability & Case Classes
+The application state is entirely modeled using immutable `case class` structures (e.g., `Task`, `TaskDate`, `TaskTime`). There is no in-place mutation of data. When a user interacts with the application, a new copy of the data structure is created. This ensures data consistency and prevents unintended side-effects across the reactive UI.
 
-### 2. Pure Functions
-All business logic is encapsulated in **Pure Functions**. These functions take the current state and parameters as input and return a new state without any side effects.
-*   `addTask`: Generates a new task list with the added entry.
-*   `toggleTask`: Returns a list with the completion status of a specific task flipped.
-*   `filterTasks` & `searchTasks`: Derive view-specific lists based on criteria.
-*   `sortTasks`: Chronologically orders tasks by date and time.
+### Pure Functions & State Transformations
+All core business logic is encapsulated in pure functions. Functions such as `addTask`, `toggleTask`, `deleteTask`, `sortTasks`, and `filterTasksForView` take the current state and explicit parameters as input, returning a new, transformed state without modifying any external variables or relying on hidden side effects. This separation makes the logic highly testable and predictable.
 
-### 3. Higher-Order Functions
-The application relies heavily on standard Scala collection transformations:
-*   **`map`**: Used to transform the task list and project signals for the UI.
-*   **`filter`**: Used for the robust search and filtering system.
-*   **`foldLeft`**: Specifically used in `calculateStats` to derive Total, Pending, and Completed counts in a single pass over the data.
-*   **`partition`**: Used to separate completed and active tasks for section grouping.
+### Higher-Order Functions
+The project extensively leverages Scala's rich collections API and higher-order functions to manipulate task lists:
+*   **`map`**: Used to transform the list of tasks (e.g., when toggling completion status) and to reactively project state signals to UI elements.
+*   **`filter` / `filterNot`**: Employed to derive specific views, such as identifying completed tasks, removing deleted tasks, or filtering by priority levels.
+*   **`sortBy`**: Applies chronological ordering to tasks based on nested date and time properties.
 
-### 4. Pattern Matching
-Used extensively to handle logic switching in a type-safe manner, particularly for the **FilterMode** ADT and for grouping tasks into dynamic sections ("Today", "Upcoming", "Completed").
+### Pattern Matching
+Pattern matching is used to type-safely handle the algebraic data types (ADTs) representing the application's views. The `SidebarView` enum is pattern-matched within `filterTasksForView` to deterministically apply the correct filtering logic for each section (e.g., Pending, Completed, High Priority), ensuring exhaustive checks by the compiler.
 
 ## Features
 
-*   **Advanced Task Creation**: Support for Title, Priority, Date, and Time.
-*   **Dual-Input Date System**: Sync between a visual Calendar Picker and manual dropdown selectors.
-*   **Chronological Sorting**: Tasks are automatically ordered by their proximity in time.
-*   **Dynamic Grouping**: Tasks are categorized into Today, Upcoming, and Completed sections.
-*   **Live Search & Filters**: Instant title search and filtering by status or High Priority.
-*   **Responsive Modern UI**: A clean, card-based layout inspired by Todoist and Notion.
+*   **Task Management**: Create, toggle, and delete tasks.
+*   **Detailed Properties**: Assign dates, times, and priority levels (High/Medium/Low) to tasks.
+*   **Chronological Sorting**: Tasks automatically sort by nearest date and time.
+*   **Dynamic Views**: Filter tasks by All, Pending, Completed, or specific Priority levels.
+*   **Reactive UI**: Built with Laminar for seamless, state-driven updates.
+*   **Modern Design**: Clean, responsive layout with intuitive interactions.
 
-## Local Run
+## Run / Deploy
 
-To build and run the project locally:
-
+### Local Development
 ```bash
-# 1. Compile the Scala.js code
+# Compile the Scala.js code
 sbt fastLinkJS
 
-# 2. Copy the compiled JS to the public directory
+# Copy the compiled JS to the public directory
 cp target/scala-3.3.3/functional-task-manager-fastopt/main.js public/
 
-# 3. Open the application
+# Open the application
 open public/index.html
 ```
 
-## Deploy to Vercel
-
-This repository is optimized for **Vercel**.
-1. Push the code to GitHub.
-2. Import the repository into Vercel.
-3. Vercel will automatically detect the `vercel.json` and use `build.sh` to install Scala/sbt and generate the production bundle.
-
-## Screenshots Placeholder
-
-![Main Planner View](placeholder-planner-view.png)
-![Task Creation Form](placeholder-form-view.png)
+### Deployment (Vercel)
+This project is configured for seamless deployment on Vercel. Connect the GitHub repository to Vercel, and it will automatically use `vercel.json` and `build.sh` to compile and serve the application from the `public` directory.
