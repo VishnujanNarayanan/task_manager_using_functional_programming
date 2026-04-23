@@ -313,3 +313,36 @@ select, input[type="date"], input[type="time"] {
     color: #1a1f23;
     font-weight: 700;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .app-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow-y: auto;
+    }
+
+    body {
+        height: auto;
+        overflow-y: auto;
+    }
+
+    .sidebar {
+        border-right: none;
+        border-bottom: 1px solid #efefef;
+        padding: 12px;
+        flex-direction: row;
+        overflow-x: auto;
+        white-space: nowrap;
+        gap: 8px;
+    }
+
+    .sidebar-item {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
+
+    .main-content {
+        padding: 20px 15px;
+    }
+}
