@@ -1,3 +1,46 @@
+/* ==========================================================================
+   Design tokens
+   One palette, one type scale, one spacing scale. Nothing off-scale.
+   Every text colour below is verified against WCAG AA on --paper or --rail.
+   ========================================================================== */
+
+:root {
+    /* Colour — 6 neutrals + 1 accent + a 3-step priority ramp */
+    --ink:        #16191D;  /* primary text          17.18:1 on paper */
+    --paper:      #FCFCFB;  /* page ground */
+    --rail:       #F4F4F2;  /* sidebar, inset surfaces */
+    --line:       #E4E4E0;  /* hairlines */
+    --muted:      #5F6570;  /* metadata, labels       5.71:1 on paper */
+    --accent:     #0F6E5C;  /* the one saturated hue  6.01:1 on paper */
+    --accent-ink: #0B5546;  /* accent, pressed */
+    --accent-wash:#EAF2F0;  /* accent at rest, as a ground */
+
+    /* Priority ramp — all clear AA at 12px, unlike the reds they replace */
+    --prio-high:  #B3261E;  /* 6.37:1 */
+    --prio-med:   #8A5200;  /* 6.22:1 */
+    --prio-low:   #1F6B4A;  /* 6.27:1 */
+
+    /* Type — 5 steps, 1.22 ratio */
+    --t-xs:    0.75rem;    /* 12px  mono metadata */
+    --t-sm:    0.8125rem;  /* 13px  UI labels */
+    --t-base:  0.9375rem;  /* 15px  task titles, body */
+    --t-md:    1.125rem;   /* 18px  subheads */
+    --t-lg:    1.75rem;    /* 28px  view title */
+
+    --sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+    /* Space — 4px base, 8 steps */
+    --s1: 4px;   --s2: 8px;   --s3: 12px;  --s4: 16px;
+    --s5: 24px;  --s6: 32px;  --s7: 48px;  --s8: 64px;
+
+    /* Radius — two values, and only two */
+    --r:    6px;  /* controls */
+    --r-sm: 2px;  /* tokens, the priority spine */
+
+    --ease: cubic-bezier(0.2, 0, 0.13, 1);
+}
+
 /* Base Reset & Typography */
 * {
     box-sizing: border-box;
@@ -6,124 +49,183 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background-color: #ffffff;
-    color: #1a1f23;
+    font-family: var(--sans);
+    font-size: var(--t-base);
+    line-height: 1.6;
+    background-color: var(--paper);
+    color: var(--ink);
     height: 100vh;
     overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* Numerals are data: tabular, so columns of times and counts line up */
+.task-meta, .stat-box, .priority-label {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
 }
 
 /* App Layout */
 .app-container {
     display: grid;
-    grid-template-columns: 240px 1fr;
+    grid-template-columns: 248px 1fr;
     height: 100vh;
 }
 
 /* Sidebar */
 .sidebar {
-    background-color: #fbfbfa;
-    border-right: 1px solid #efefef;
-    padding: 24px 12px;
+    background-color: var(--rail);
+    border-right: 1px solid var(--line);
+    padding: var(--s5) var(--s3);
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
+}
+
+.sidebar-section-label {
+    margin-top: var(--s5);
+    margin-bottom: var(--s1);
+    padding: 0 var(--s3);
+    font-size: var(--t-xs);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
 }
 
 .sidebar-item {
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.875rem;
+    position: relative;
+    padding: var(--s2) var(--s3);
+    border-radius: var(--r);
+    font-size: var(--t-sm);
     font-weight: 500;
-    color: #4b5563;
+    color: var(--ink);
     cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
     user-select: none;
+    transition: background-color 0.15s var(--ease), color 0.15s var(--ease);
 }
 
 .sidebar-item:hover {
-    background-color: #efefee;
+    background-color: rgba(22, 25, 29, 0.05);
 }
 
+/* Active state is carried by an accent marker, not just a grey fill —
+   at 13px a background swap alone was too weak to locate at a glance. */
 .sidebar-item.active {
-    background-color: #ebebeb;
-    color: #111827;
+    background-color: var(--accent-wash);
+    color: var(--accent);
     font-weight: 600;
+}
+
+.sidebar-item.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 16px;
+    border-radius: var(--r-sm);
+    background-color: var(--accent);
 }
 
 /* Main Content Area */
 .main-content {
     overflow-y: auto;
-    padding: 60px 40px;
+    padding: var(--s7) var(--s6) var(--s8);
     display: flex;
     justify-content: center;
 }
 
 .content-inner {
     width: 100%;
-    max-width: 700px;
+    max-width: 640px;   /* holds task titles to a ~68-character measure */
 }
 
 h1.view-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-bottom: 24px;
-    color: #111827;
+    font-size: var(--t-lg);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: var(--s5);
+    color: var(--ink);
 }
 
-/* Dynamic Add Task System */
+/* Dynamic Add Task System
+   NB: `display` on .add-task-trigger and .add-task-form is driven by inline
+   style from Laminar (display <-- isAddingVar.signal), so it cannot be set
+   here — these rules must hold without owning the display property. */
 .add-task-trigger {
-    display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 4px;
-    color: #64748b;
+    gap: var(--s3);
+    padding: var(--s3);
+    margin-bottom: var(--s5);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    background-color: transparent;
+    color: var(--muted);
+    font-size: var(--t-base);
     cursor: pointer;
-    border-radius: 8px;
-    transition: all 0.2s;
-    margin-bottom: 24px;
-    font-size: 0.9375rem;
+    user-select: none;
+    transition: border-color 0.15s var(--ease), color 0.15s var(--ease),
+                background-color 0.15s var(--ease);
 }
 
 .add-task-trigger:hover {
-    color: #db4c3f;
+    border-color: var(--accent);
+    background-color: var(--accent-wash);
+    color: var(--accent);
 }
 
 .add-task-icon {
-    font-size: 1.25rem;
-    font-weight: 300;
-    color: #db4c3f;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex: none;
+    border-radius: 50%;
+    background-color: var(--accent);
+    color: #fff;
+    font-size: var(--t-base);
+    font-weight: 500;
+    line-height: 1;
 }
 
 .add-task-form {
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 32px;
-    background: white;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: var(--s4);
+    margin-bottom: var(--s5);
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(22, 25, 29, 0.04);
 }
 
 .quick-add-input {
     width: 100%;
     border: none;
-    font-size: 1rem;
+    font-family: var(--sans);
+    font-size: var(--t-md);
     font-weight: 500;
-    padding: 4px 0 12px;
+    line-height: 1.4;
+    padding: 0 0 var(--s3);
     outline: none;
-    color: #1a1f23;
+    background: transparent;
+    color: var(--ink);
 }
 
 .quick-add-input::placeholder {
-    color: #9ca3af;
+    color: var(--muted);
+    font-weight: 400;
 }
 
 .advanced-options {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    padding-top: 12px;
-    border-top: 1px solid #f3f4f6;
+    gap: var(--s3);
+    padding-top: var(--s3);
+    border-top: 1px solid var(--line);
 }
 
 .option-field {
@@ -133,188 +235,312 @@ h1.view-title {
 
 .option-field label {
     display: block;
-    font-size: 0.7rem;
-    font-weight: 700;
+    font-size: var(--t-xs);
+    font-weight: 600;
     text-transform: uppercase;
-    color: #9ca3af;
-    margin-bottom: 4px;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: var(--s1);
 }
 
 select, input[type="date"], input[type="time"] {
     width: 100%;
-    padding: 6px 8px;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    font-size: 0.8125rem;
-    background: #f9fafb;
-    color: #374151;
+    padding: var(--s2) var(--s3);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    font-family: var(--mono);
+    font-size: var(--t-sm);
+    background: var(--rail);
+    color: var(--ink);
+    transition: border-color 0.15s var(--ease), background-color 0.15s var(--ease);
+}
+
+select {
+    font-family: var(--sans);
+}
+
+select:hover, input[type="date"]:hover, input[type="time"]:hover {
+    border-color: var(--muted);
 }
 
 .add-task-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid #f3f4f6;
+    gap: var(--s2);
+    margin-top: var(--s4);
+    padding-top: var(--s4);
+    border-top: 1px solid var(--line);
+}
+
+.btn-cancel, .btn-submit {
+    border: 1px solid transparent;
+    padding: var(--s2) var(--s4);
+    border-radius: var(--r);
+    font-family: var(--sans);
+    font-size: var(--t-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s var(--ease), border-color 0.15s var(--ease);
 }
 
 .btn-cancel {
-    background: #f3f4f6;
-    color: #4b5563;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    background: transparent;
+    border-color: var(--line);
+    color: var(--muted);
 }
 
 .btn-cancel:hover {
-    background: #e5e7eb;
+    background: var(--rail);
+    color: var(--ink);
 }
 
 .btn-submit {
-    background: #db4c3f;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    background: var(--accent);
+    color: #fff;
 }
 
 .btn-submit:hover {
-    background: #b03d32;
+    background: var(--accent-ink);
 }
 
+/* Disabled state was white on #fca5a5 — 1.90:1, effectively unreadable.
+   Now a flat neutral that states 'unavailable' at 5.71:1. */
 .btn-submit:disabled {
-    background: #fca5a5;
+    background: var(--rail);
+    border-color: var(--line);
+    color: var(--muted);
     cursor: not-allowed;
 }
 
-/* Task List Styling */
+/* ==========================================================================
+   Task rows — and the priority spine
+
+   The signature element: a 3px rule on the leading edge of every row,
+   coloured by priority. It is the only saturated colour in the interface,
+   which makes priority scannable down the left edge in one eye movement.
+   It also lets the priority text demote from shouting 10.4px uppercase to
+   quiet metadata — the text stays, so meaning is never carried by colour
+   alone.
+   ========================================================================== */
+
 .task-row {
+    position: relative;
     display: flex;
     align-items: flex-start;
-    padding: 12px 0;
-    border-bottom: 1px solid #f3f4f6;
+    gap: var(--s3);
+    padding: var(--s3) var(--s3) var(--s3) var(--s4);
+    border-bottom: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: background-color 0.15s var(--ease);
+}
+
+/* The row claimed cursor:pointer but gave no feedback at all on hover. */
+.task-row:hover {
+    background-color: var(--rail);
+}
+
+/* The list's closing rule and the stats' opening rule stacked into a
+   doubled hairline with a gap between them. The stats border carries it. */
+.task-row:last-child {
+    border-bottom: none;
+}
+
+.task-row::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: var(--s3);
+    bottom: var(--s3);
+    width: 3px;
+    border-radius: var(--r-sm);
+    background-color: var(--line);
+    transition: background-color 0.2s var(--ease);
+}
+
+.task-row--high::before   { background-color: var(--prio-high); }
+.task-row--medium::before { background-color: var(--prio-med); }
+.task-row--low::before    { background-color: var(--prio-low); }
+
+/* Done work recedes: the spine desaturates, so completion reads
+   peripherally without needing to parse the strikethrough. */
+.task-row.completed::before {
+    background-color: var(--line);
 }
 
 .task-checkbox-wrapper {
-    padding-top: 2px;
-    margin-right: 14px;
+    padding-top: 1px;
+    flex: none;
 }
 
 .task-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
     width: 18px;
     height: 18px;
+    margin: 0;
+    flex: none;
+    border: 1.5px solid var(--muted);
+    border-radius: var(--r-sm);
+    background-color: #fff;
     cursor: pointer;
-    accent-color: #db4c3f;
+    transition: background-color 0.15s var(--ease), border-color 0.15s var(--ease);
+}
+
+.task-checkbox:hover {
+    border-color: var(--accent);
+}
+
+.task-checkbox:checked {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M2.5 6.2l2.3 2.3 4.7-4.7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 12px 12px;
 }
 
 .task-body {
     flex-grow: 1;
+    min-width: 0;   /* lets long unbroken titles wrap instead of overflowing */
 }
 
 .task-title {
-    font-size: 0.9375rem;
+    font-size: var(--t-base);
     font-weight: 400;
-    color: #202020;
-    margin-bottom: 4px;
+    line-height: 1.5;
+    color: var(--ink);
+    margin-bottom: var(--s1);
+    overflow-wrap: anywhere;
 }
 
 .task-row.completed .task-title {
     text-decoration: line-through;
-    color: #9ca3af;
+    text-decoration-color: var(--muted);
+    color: var(--muted);
 }
 
 .task-meta {
-    font-size: 0.75rem;
-    color: #64748b;
+    font-size: var(--t-xs);
+    line-height: 1.4;
+    color: var(--muted);
     display: flex;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: var(--s1) var(--s3);
     align-items: center;
 }
 
 .priority-label {
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 0.65rem;
+    font-size: var(--t-xs);
+    font-weight: 500;
 }
 
-.priority-high { color: #dc2626; }
-.priority-medium { color: #d97706; }
-.priority-low { color: #059669; }
+.priority-high   { color: var(--prio-high); }
+.priority-medium { color: var(--prio-med); }
+.priority-low    { color: var(--prio-low); }
+
+.task-row.completed .priority-label {
+    color: var(--muted);
+}
 
 .task-actions {
+    flex: none;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: opacity 0.15s var(--ease);
 }
 
-.task-row:hover .task-actions {
+/* :focus-within matters — the button stayed focusable at opacity 0, so
+   keyboard focus landed on a control that was nowhere on screen. */
+.task-row:hover .task-actions,
+.task-row:focus-within .task-actions {
     opacity: 1;
 }
 
 .delete-action {
     background: none;
     border: none;
-    color: #9ca3af;
+    color: var(--muted);
     cursor: pointer;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 4px;
+    font-family: var(--sans);
+    font-size: var(--t-sm);
+    font-weight: 500;
+    padding: var(--s1) var(--s2);
+    border-radius: var(--r);
+    transition: color 0.15s var(--ease), background-color 0.15s var(--ease);
 }
 
 .delete-action:hover {
-    color: #ef4444;
-    background: #fee2e2;
+    color: var(--prio-high);
+    background: rgba(179, 38, 30, 0.08);
 }
 
-/* Section Grouping & Empty States */
-.group-title {
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #202020;
-    margin: 32px 0 8px;
-    letter-spacing: 0.05em;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #f3f4f6;
-}
-
+/* Empty state
+   Was #9ca3af centred in dead space at 2.54:1 — the least readable text on
+   the page, in the one state where the copy is all there is to read. */
 .empty-state {
-    padding: 40px 0;
+    padding: var(--s7) var(--s5);
     text-align: center;
-    color: #9ca3af;
-    font-size: 0.875rem;
+    color: var(--muted);
+    font-size: var(--t-sm);
+    background-color: var(--rail);
+    border-radius: var(--r);
 }
 
-/* Stats */
+/* Stats
+   Previously margin-top:60px regardless of content, so on an empty list the
+   counters floated alone in whitespace. Now anchored to the list it counts. */
 .stats-summary {
-    margin-top: 60px;
-    padding-top: 32px;
-    border-top: 1px solid #f3f4f6;
+    margin-top: var(--s5);
+    padding-top: var(--s4);
+    border-top: 1px solid var(--line);
     display: flex;
-    gap: 32px;
+    gap: var(--s5);
 }
 
 .stat-box {
-    font-size: 0.8125rem;
-    color: #64748b;
+    font-size: var(--t-xs);
+    color: var(--muted);
 }
 
 .stat-box strong {
-    color: #1a1f23;
-    font-weight: 700;
+    color: var(--ink);
+    font-weight: 500;
 }
 
-/* Mobile Responsiveness */
+/* ==========================================================================
+   Focus & motion
+   ========================================================================== */
+
+/* One focus treatment, applied everywhere, on the accent so it is never
+   mistaken for a hover or selected state. There were no focus styles at
+   all before, and .quick-add-input actively removed its outline. */
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+}
+
+.quick-add-input:focus-visible {
+    outline-offset: 4px;
+}
+
+.sidebar-item:focus-visible {
+    outline-offset: -2px;   /* keeps the ring inside the 12px rail gutter */
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
 @media (max-width: 768px) {
     .app-container {
         grid-template-columns: 1fr;
@@ -327,22 +553,93 @@ select, input[type="date"], input[type="time"] {
         overflow-y: auto;
     }
 
+    /* The rail was `overflow-x: auto; white-space: nowrap`, which clipped
+       'High Priority' at the viewport edge with no scroll affordance and
+       swept the 'Priority' label — styled for a vertical list — into the
+       middle of the scroller. Wrapping instead: every filter stays visible,
+       the label breaks its own row, and nothing scrolls sideways. */
     .sidebar {
         border-right: none;
-        border-bottom: 1px solid #efefef;
-        padding: 12px;
+        border-bottom: 1px solid var(--line);
+        padding: var(--s3);
         flex-direction: row;
-        overflow-x: auto;
-        white-space: nowrap;
-        gap: 8px;
+        flex-wrap: wrap;
+        gap: var(--s1);
+    }
+
+    .sidebar-section-label {
+        flex-basis: 100%;
+        margin-top: var(--s2);
+        margin-bottom: 0;
+        padding: 0 var(--s2);
     }
 
     .sidebar-item {
-        padding: 6px 10px;
-        font-size: 0.75rem;
+        padding: var(--s2) var(--s3);
+        font-size: var(--t-sm);
+        border: 1px solid transparent;
+        min-height: 36px;
+        display: flex;
+        align-items: center;
+    }
+
+    /* The 3px marker is a left-edge device; as a chip it reads as damage. */
+    .sidebar-item.active::before {
+        content: none;
+    }
+
+    .sidebar-item.active {
+        border-color: var(--accent);
     }
 
     .main-content {
-        padding: 20px 15px;
+        padding: var(--s5) var(--s4) var(--s7);
+    }
+}
+
+@media (max-width: 420px) {
+    h1.view-title {
+        font-size: 1.5rem;
+    }
+
+    .option-field {
+        min-width: 100%;   /* date/time/priority stack rather than squeeze */
+    }
+
+    .add-task-actions .btn-cancel,
+    .add-task-actions .btn-submit {
+        flex: 1;           /* full-width targets at the narrowest sizes */
+    }
+}
+
+/* Touch: hover never fires, so an opacity:0 Delete revealed only on hover
+   was undiscoverable — the control existed but could not be reached. */
+@media (hover: none) {
+    .task-actions {
+        opacity: 1;
+    }
+
+    .task-row:hover {
+        background-color: transparent;
+    }
+
+    /* Revealing Delete is not enough if it is a 25px-tall target. */
+    .delete-action {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        min-width: 44px;
+        padding: var(--s2) var(--s3);
+    }
+
+    .task-checkbox {
+        width: 22px;
+        height: 22px;
+        background-size: 14px 14px;
+    }
+
+    .sidebar-item {
+        min-height: 44px;
     }
 }

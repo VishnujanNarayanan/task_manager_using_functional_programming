@@ -80,7 +80,7 @@ object Main {
         renderSidebarItem("Tasks", SidebarView.Tasks),
         renderSidebarItem("Pending", SidebarView.Pending),
         renderSidebarItem("Completed", SidebarView.Completed),
-        div(styleAttr := "margin-top: 20px; padding: 0 12px; font-size: 0.75rem; font-weight: 700; color: #9ca3af; text-transform: uppercase;", "Priority"),
+        div(cls := "sidebar-section-label", "Priority"),
         renderSidebarItem("High Priority", SidebarView.HighPriority),
         renderSidebarItem("Medium Priority", SidebarView.MediumPriority),
         renderSidebarItem("Low Priority", SidebarView.LowPriority)
@@ -98,9 +98,8 @@ object Main {
           
           renderQuickAdd(),
 
-          div(
-            h3(cls := "group-title", "Task List"),
-            children <-- tasksVar.signal.combineWith(selectedViewVar.signal).map { case (tasks, view) => 
+          div(cls := "task-list",
+            children <-- tasksVar.signal.combineWith(selectedViewVar.signal).map { case (tasks, view) =>
               val filtered = filterTasksForView(tasks, view)
               if (filtered.isEmpty) {
                 List(div(cls := "empty-state", "No tasks here. Add a new task to get started!"))
@@ -123,7 +122,13 @@ object Main {
     div(
       cls := "sidebar-item",
       cls.toggle("active") <-- selectedViewVar.signal.map(_ == view),
+      role := "button",
+      tabIndex := 0,
+      aria.current <-- selectedViewVar.signal.map(v => if (v == view) "true" else "false"),
       onClick --> { _ => selectedViewVar.set(view) },
+      onKeyDown.filter(e => e.key == "Enter" || e.key == " ").preventDefault --> { _ =>
+        selectedViewVar.set(view)
+      },
       label
     )
   }
@@ -232,9 +237,8 @@ object Main {
 
   def renderTaskRow(task: Task): HtmlElement = {
     div(
-      cls := "task-row",
+      cls := s"task-row task-row--${task.priority.toString.toLowerCase}",
       cls.toggle("completed") := task.completed,
-      styleAttr := "cursor: pointer;",
       onClick --> { _ => tasksVar.update(ts => toggleTask(ts, task.id)) },
       
       div(cls := "task-checkbox-wrapper",

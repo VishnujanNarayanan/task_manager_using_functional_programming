@@ -3,6 +3,9 @@ target/
 project/target/
 project/project/
 
+# Compiled bundle — generated into public/ by build.sh at deploy time
+public/main.js
+
 # IDEs
 .idea/
 .bsp/
