@@ -502,6 +502,36 @@ select:hover, input[type="date"]:hover, input[type="time"]:hover {
 }
 
 /* ==========================================================================
+   Focus & motion
+   ========================================================================== */
+
+/* One focus treatment, applied everywhere, on the accent so it is never
+   mistaken for a hover or selected state. There were no focus styles at
+   all before, and .quick-add-input actively removed its outline. */
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+}
+
+.quick-add-input:focus-visible {
+    outline-offset: 4px;
+}
+
+.sidebar-item:focus-visible {
+    outline-offset: -2px;   /* keeps the ring inside the 12px rail gutter */
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ==========================================================================
    Responsive
    ========================================================================== */
 
