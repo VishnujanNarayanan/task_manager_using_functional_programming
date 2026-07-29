@@ -2,6 +2,10 @@
 target/
 project/target/
 project/project/
+project/build.properties
+
+# Compiled bundle — generated into public/ by build.sh at deploy time
+public/main.js
 
 # IDEs
 .idea/
