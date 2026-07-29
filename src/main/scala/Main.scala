@@ -80,7 +80,7 @@ object Main {
         renderSidebarItem("Tasks", SidebarView.Tasks),
         renderSidebarItem("Pending", SidebarView.Pending),
         renderSidebarItem("Completed", SidebarView.Completed),
-        div(styleAttr := "margin-top: 20px; padding: 0 12px; font-size: 0.75rem; font-weight: 700; color: #9ca3af; text-transform: uppercase;", "Priority"),
+        div(cls := "sidebar-section-label", "Priority"),
         renderSidebarItem("High Priority", SidebarView.HighPriority),
         renderSidebarItem("Medium Priority", SidebarView.MediumPriority),
         renderSidebarItem("Low Priority", SidebarView.LowPriority)
@@ -123,7 +123,13 @@ object Main {
     div(
       cls := "sidebar-item",
       cls.toggle("active") <-- selectedViewVar.signal.map(_ == view),
+      role := "button",
+      tabIndex := 0,
+      aria.current <-- selectedViewVar.signal.map(v => if (v == view) "true" else "false"),
       onClick --> { _ => selectedViewVar.set(view) },
+      onKeyDown.filter(e => e.key == "Enter" || e.key == " ").preventDefault --> { _ =>
+        selectedViewVar.set(view)
+      },
       label
     )
   }
