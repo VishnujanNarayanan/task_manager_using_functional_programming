@@ -468,42 +468,37 @@ select:hover, input[type="date"]:hover, input[type="time"]:hover {
     background: rgba(179, 38, 30, 0.08);
 }
 
-/* Section Grouping & Empty States */
-.group-title {
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #202020;
-    margin: 32px 0 8px;
-    letter-spacing: 0.05em;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #f3f4f6;
-}
-
+/* Empty state
+   Was #9ca3af centred in dead space at 2.54:1 — the least readable text on
+   the page, in the one state where the copy is all there is to read. */
 .empty-state {
-    padding: 40px 0;
+    padding: var(--s7) var(--s5);
     text-align: center;
-    color: #9ca3af;
-    font-size: 0.875rem;
+    color: var(--muted);
+    font-size: var(--t-sm);
+    background-color: var(--rail);
+    border-radius: var(--r);
 }
 
-/* Stats */
+/* Stats
+   Previously margin-top:60px regardless of content, so on an empty list the
+   counters floated alone in whitespace. Now anchored to the list it counts. */
 .stats-summary {
-    margin-top: 60px;
-    padding-top: 32px;
-    border-top: 1px solid #f3f4f6;
+    margin-top: var(--s5);
+    padding-top: var(--s4);
+    border-top: 1px solid var(--line);
     display: flex;
-    gap: 32px;
+    gap: var(--s5);
 }
 
 .stat-box {
-    font-size: 0.8125rem;
-    color: #64748b;
+    font-size: var(--t-xs);
+    color: var(--muted);
 }
 
 .stat-box strong {
-    color: #1a1f23;
-    font-weight: 700;
+    color: var(--ink);
+    font-weight: 500;
 }
 
 /* Mobile Responsiveness */
