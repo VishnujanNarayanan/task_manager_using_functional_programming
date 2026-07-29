@@ -1,3 +1,46 @@
+/* ==========================================================================
+   Design tokens
+   One palette, one type scale, one spacing scale. Nothing off-scale.
+   Every text colour below is verified against WCAG AA on --paper or --rail.
+   ========================================================================== */
+
+:root {
+    /* Colour — 6 neutrals + 1 accent + a 3-step priority ramp */
+    --ink:        #16191D;  /* primary text          17.18:1 on paper */
+    --paper:      #FCFCFB;  /* page ground */
+    --rail:       #F4F4F2;  /* sidebar, inset surfaces */
+    --line:       #E4E4E0;  /* hairlines */
+    --muted:      #5F6570;  /* metadata, labels       5.71:1 on paper */
+    --accent:     #0F6E5C;  /* the one saturated hue  6.01:1 on paper */
+    --accent-ink: #0B5546;  /* accent, pressed */
+    --accent-wash:#EAF2F0;  /* accent at rest, as a ground */
+
+    /* Priority ramp — all clear AA at 12px, unlike the reds they replace */
+    --prio-high:  #B3261E;  /* 6.37:1 */
+    --prio-med:   #8A5200;  /* 6.22:1 */
+    --prio-low:   #1F6B4A;  /* 6.27:1 */
+
+    /* Type — 5 steps, 1.22 ratio */
+    --t-xs:    0.75rem;    /* 12px  mono metadata */
+    --t-sm:    0.8125rem;  /* 13px  UI labels */
+    --t-base:  0.9375rem;  /* 15px  task titles, body */
+    --t-md:    1.125rem;   /* 18px  subheads */
+    --t-lg:    1.75rem;    /* 28px  view title */
+
+    --sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+    /* Space — 4px base, 8 steps */
+    --s1: 4px;   --s2: 8px;   --s3: 12px;  --s4: 16px;
+    --s5: 24px;  --s6: 32px;  --s7: 48px;  --s8: 64px;
+
+    /* Radius — two values, and only two */
+    --r:    6px;  /* controls */
+    --r-sm: 2px;  /* tokens, the priority spine */
+
+    --ease: cubic-bezier(0.2, 0, 0.13, 1);
+}
+
 /* Base Reset & Typography */
 * {
     box-sizing: border-box;
@@ -6,11 +49,21 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background-color: #ffffff;
-    color: #1a1f23;
+    font-family: var(--sans);
+    font-size: var(--t-base);
+    line-height: 1.6;
+    background-color: var(--paper);
+    color: var(--ink);
     height: 100vh;
     overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* Numerals are data: tabular, so columns of times and counts line up */
+.task-meta, .stat-box, .priority-label {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
 }
 
 /* App Layout */
