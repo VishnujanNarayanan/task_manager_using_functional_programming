@@ -501,7 +501,10 @@ select:hover, input[type="date"]:hover, input[type="time"]:hover {
     font-weight: 500;
 }
 
-/* Mobile Responsiveness */
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
 @media (max-width: 768px) {
     .app-container {
         grid-template-columns: 1fr;
@@ -514,22 +517,73 @@ select:hover, input[type="date"]:hover, input[type="time"]:hover {
         overflow-y: auto;
     }
 
+    /* The rail was `overflow-x: auto; white-space: nowrap`, which clipped
+       'High Priority' at the viewport edge with no scroll affordance and
+       swept the 'Priority' label — styled for a vertical list — into the
+       middle of the scroller. Wrapping instead: every filter stays visible,
+       the label breaks its own row, and nothing scrolls sideways. */
     .sidebar {
         border-right: none;
-        border-bottom: 1px solid #efefef;
-        padding: 12px;
+        border-bottom: 1px solid var(--line);
+        padding: var(--s3);
         flex-direction: row;
-        overflow-x: auto;
-        white-space: nowrap;
-        gap: 8px;
+        flex-wrap: wrap;
+        gap: var(--s1);
+    }
+
+    .sidebar-section-label {
+        flex-basis: 100%;
+        margin-top: var(--s2);
+        margin-bottom: 0;
+        padding: 0 var(--s2);
     }
 
     .sidebar-item {
-        padding: 6px 10px;
-        font-size: 0.75rem;
+        padding: var(--s2) var(--s3);
+        font-size: var(--t-sm);
+        border: 1px solid transparent;
+        min-height: 36px;
+        display: flex;
+        align-items: center;
+    }
+
+    /* The 3px marker is a left-edge device; as a chip it reads as damage. */
+    .sidebar-item.active::before {
+        content: none;
+    }
+
+    .sidebar-item.active {
+        border-color: var(--accent);
     }
 
     .main-content {
-        padding: 20px 15px;
+        padding: var(--s5) var(--s4) var(--s7);
+    }
+}
+
+@media (max-width: 420px) {
+    h1.view-title {
+        font-size: 1.5rem;
+    }
+
+    .option-field {
+        min-width: 100%;   /* date/time/priority stack rather than squeeze */
+    }
+
+    .add-task-actions .btn-cancel,
+    .add-task-actions .btn-submit {
+        flex: 1;           /* full-width targets at the narrowest sizes */
+    }
+}
+
+/* Touch: hover never fires, so an opacity:0 Delete revealed only on hover
+   was undiscoverable — the control existed but could not be reached. */
+@media (hover: none) {
+    .task-actions {
+        opacity: 1;
+    }
+
+    .task-row:hover {
+        background-color: transparent;
     }
 }
