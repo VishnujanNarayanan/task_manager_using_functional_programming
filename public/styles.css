@@ -133,45 +133,64 @@ body {
 /* Main Content Area */
 .main-content {
     overflow-y: auto;
-    padding: 60px 40px;
+    padding: var(--s7) var(--s6) var(--s8);
     display: flex;
     justify-content: center;
 }
 
 .content-inner {
     width: 100%;
-    max-width: 700px;
+    max-width: 640px;   /* holds task titles to a ~68-character measure */
 }
 
 h1.view-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-bottom: 24px;
-    color: #111827;
+    font-size: var(--t-lg);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: var(--s5);
+    color: var(--ink);
 }
 
-/* Dynamic Add Task System */
+/* Dynamic Add Task System
+   NB: `display` on .add-task-trigger and .add-task-form is driven by inline
+   style from Laminar (display <-- isAddingVar.signal), so it cannot be set
+   here — these rules must hold without owning the display property. */
 .add-task-trigger {
-    display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 4px;
-    color: #64748b;
+    gap: var(--s3);
+    padding: var(--s3);
+    margin-bottom: var(--s5);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    background-color: transparent;
+    color: var(--muted);
+    font-size: var(--t-base);
     cursor: pointer;
-    border-radius: 8px;
-    transition: all 0.2s;
-    margin-bottom: 24px;
-    font-size: 0.9375rem;
+    user-select: none;
+    transition: border-color 0.15s var(--ease), color 0.15s var(--ease),
+                background-color 0.15s var(--ease);
 }
 
 .add-task-trigger:hover {
-    color: #db4c3f;
+    border-color: var(--accent);
+    background-color: var(--accent-wash);
+    color: var(--accent);
 }
 
 .add-task-icon {
-    font-size: 1.25rem;
-    font-weight: 300;
-    color: #db4c3f;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex: none;
+    border-radius: 50%;
+    background-color: var(--accent);
+    color: #fff;
+    font-size: var(--t-base);
+    font-weight: 500;
+    line-height: 1;
 }
 
 .add-task-form {

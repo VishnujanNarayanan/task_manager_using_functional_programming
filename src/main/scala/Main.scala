@@ -98,9 +98,8 @@ object Main {
           
           renderQuickAdd(),
 
-          div(
-            h3(cls := "group-title", "Task List"),
-            children <-- tasksVar.signal.combineWith(selectedViewVar.signal).map { case (tasks, view) => 
+          div(cls := "task-list",
+            children <-- tasksVar.signal.combineWith(selectedViewVar.signal).map { case (tasks, view) =>
               val filtered = filterTasksForView(tasks, view)
               if (filtered.isEmpty) {
                 List(div(cls := "empty-state", "No tasks here. Add a new task to get started!"))
