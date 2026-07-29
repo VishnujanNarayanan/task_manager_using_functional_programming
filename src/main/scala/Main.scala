@@ -237,9 +237,8 @@ object Main {
 
   def renderTaskRow(task: Task): HtmlElement = {
     div(
-      cls := "task-row",
+      cls := s"task-row task-row--${task.priority.toString.toLowerCase}",
       cls.toggle("completed") := task.completed,
-      styleAttr := "cursor: pointer;",
       onClick --> { _ => tasksVar.update(ts => toggleTask(ts, task.id)) },
       
       div(cls := "task-checkbox-wrapper",

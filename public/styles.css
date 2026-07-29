@@ -312,83 +312,160 @@ select:hover, input[type="date"]:hover, input[type="time"]:hover {
     cursor: not-allowed;
 }
 
-/* Task List Styling */
+/* ==========================================================================
+   Task rows — and the priority spine
+
+   The signature element: a 3px rule on the leading edge of every row,
+   coloured by priority. It is the only saturated colour in the interface,
+   which makes priority scannable down the left edge in one eye movement.
+   It also lets the priority text demote from shouting 10.4px uppercase to
+   quiet metadata — the text stays, so meaning is never carried by colour
+   alone.
+   ========================================================================== */
+
 .task-row {
+    position: relative;
     display: flex;
     align-items: flex-start;
-    padding: 12px 0;
-    border-bottom: 1px solid #f3f4f6;
+    gap: var(--s3);
+    padding: var(--s3) var(--s3) var(--s3) var(--s4);
+    border-bottom: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: background-color 0.15s var(--ease);
+}
+
+/* The row claimed cursor:pointer but gave no feedback at all on hover. */
+.task-row:hover {
+    background-color: var(--rail);
+}
+
+.task-row::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: var(--s3);
+    bottom: var(--s3);
+    width: 3px;
+    border-radius: var(--r-sm);
+    background-color: var(--line);
+    transition: background-color 0.2s var(--ease);
+}
+
+.task-row--high::before   { background-color: var(--prio-high); }
+.task-row--medium::before { background-color: var(--prio-med); }
+.task-row--low::before    { background-color: var(--prio-low); }
+
+/* Done work recedes: the spine desaturates, so completion reads
+   peripherally without needing to parse the strikethrough. */
+.task-row.completed::before {
+    background-color: var(--line);
 }
 
 .task-checkbox-wrapper {
-    padding-top: 2px;
-    margin-right: 14px;
+    padding-top: 1px;
+    flex: none;
 }
 
 .task-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
     width: 18px;
     height: 18px;
+    margin: 0;
+    flex: none;
+    border: 1.5px solid var(--muted);
+    border-radius: var(--r-sm);
+    background-color: #fff;
     cursor: pointer;
-    accent-color: #db4c3f;
+    transition: background-color 0.15s var(--ease), border-color 0.15s var(--ease);
+}
+
+.task-checkbox:hover {
+    border-color: var(--accent);
+}
+
+.task-checkbox:checked {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M2.5 6.2l2.3 2.3 4.7-4.7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 12px 12px;
 }
 
 .task-body {
     flex-grow: 1;
+    min-width: 0;   /* lets long unbroken titles wrap instead of overflowing */
 }
 
 .task-title {
-    font-size: 0.9375rem;
+    font-size: var(--t-base);
     font-weight: 400;
-    color: #202020;
-    margin-bottom: 4px;
+    line-height: 1.5;
+    color: var(--ink);
+    margin-bottom: var(--s1);
+    overflow-wrap: anywhere;
 }
 
 .task-row.completed .task-title {
     text-decoration: line-through;
-    color: #9ca3af;
+    text-decoration-color: var(--muted);
+    color: var(--muted);
 }
 
 .task-meta {
-    font-size: 0.75rem;
-    color: #64748b;
+    font-size: var(--t-xs);
+    line-height: 1.4;
+    color: var(--muted);
     display: flex;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: var(--s1) var(--s3);
     align-items: center;
 }
 
 .priority-label {
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 0.65rem;
+    font-size: var(--t-xs);
+    font-weight: 500;
 }
 
-.priority-high { color: #dc2626; }
-.priority-medium { color: #d97706; }
-.priority-low { color: #059669; }
+.priority-high   { color: var(--prio-high); }
+.priority-medium { color: var(--prio-med); }
+.priority-low    { color: var(--prio-low); }
+
+.task-row.completed .priority-label {
+    color: var(--muted);
+}
 
 .task-actions {
+    flex: none;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: opacity 0.15s var(--ease);
 }
 
-.task-row:hover .task-actions {
+/* :focus-within matters — the button stayed focusable at opacity 0, so
+   keyboard focus landed on a control that was nowhere on screen. */
+.task-row:hover .task-actions,
+.task-row:focus-within .task-actions {
     opacity: 1;
 }
 
 .delete-action {
     background: none;
     border: none;
-    color: #9ca3af;
+    color: var(--muted);
     cursor: pointer;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 4px;
+    font-family: var(--sans);
+    font-size: var(--t-sm);
+    font-weight: 500;
+    padding: var(--s1) var(--s2);
+    border-radius: var(--r);
+    transition: color 0.15s var(--ease), background-color 0.15s var(--ease);
 }
 
 .delete-action:hover {
-    color: #ef4444;
-    background: #fee2e2;
+    color: var(--prio-high);
+    background: rgba(179, 38, 30, 0.08);
 }
 
 /* Section Grouping & Empty States */
