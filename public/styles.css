@@ -194,34 +194,38 @@ h1.view-title {
 }
 
 .add-task-form {
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 32px;
-    background: white;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: var(--s4);
+    margin-bottom: var(--s5);
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(22, 25, 29, 0.04);
 }
 
 .quick-add-input {
     width: 100%;
     border: none;
-    font-size: 1rem;
+    font-family: var(--sans);
+    font-size: var(--t-md);
     font-weight: 500;
-    padding: 4px 0 12px;
+    line-height: 1.4;
+    padding: 0 0 var(--s3);
     outline: none;
-    color: #1a1f23;
+    background: transparent;
+    color: var(--ink);
 }
 
 .quick-add-input::placeholder {
-    color: #9ca3af;
+    color: var(--muted);
+    font-weight: 400;
 }
 
 .advanced-options {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    padding-top: 12px;
-    border-top: 1px solid #f3f4f6;
+    gap: var(--s3);
+    padding-top: var(--s3);
+    border-top: 1px solid var(--line);
 }
 
 .option-field {
@@ -231,67 +235,80 @@ h1.view-title {
 
 .option-field label {
     display: block;
-    font-size: 0.7rem;
-    font-weight: 700;
+    font-size: var(--t-xs);
+    font-weight: 600;
     text-transform: uppercase;
-    color: #9ca3af;
-    margin-bottom: 4px;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: var(--s1);
 }
 
 select, input[type="date"], input[type="time"] {
     width: 100%;
-    padding: 6px 8px;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    font-size: 0.8125rem;
-    background: #f9fafb;
-    color: #374151;
+    padding: var(--s2) var(--s3);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    font-family: var(--mono);
+    font-size: var(--t-sm);
+    background: var(--rail);
+    color: var(--ink);
+    transition: border-color 0.15s var(--ease), background-color 0.15s var(--ease);
+}
+
+select {
+    font-family: var(--sans);
+}
+
+select:hover, input[type="date"]:hover, input[type="time"]:hover {
+    border-color: var(--muted);
 }
 
 .add-task-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid #f3f4f6;
+    gap: var(--s2);
+    margin-top: var(--s4);
+    padding-top: var(--s4);
+    border-top: 1px solid var(--line);
+}
+
+.btn-cancel, .btn-submit {
+    border: 1px solid transparent;
+    padding: var(--s2) var(--s4);
+    border-radius: var(--r);
+    font-family: var(--sans);
+    font-size: var(--t-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s var(--ease), border-color 0.15s var(--ease);
 }
 
 .btn-cancel {
-    background: #f3f4f6;
-    color: #4b5563;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    background: transparent;
+    border-color: var(--line);
+    color: var(--muted);
 }
 
 .btn-cancel:hover {
-    background: #e5e7eb;
+    background: var(--rail);
+    color: var(--ink);
 }
 
 .btn-submit {
-    background: #db4c3f;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    background: var(--accent);
+    color: #fff;
 }
 
 .btn-submit:hover {
-    background: #b03d32;
+    background: var(--accent-ink);
 }
 
+/* Disabled state was white on #fca5a5 — 1.90:1, effectively unreadable.
+   Now a flat neutral that states 'unavailable' at 5.71:1. */
 .btn-submit:disabled {
-    background: #fca5a5;
+    background: var(--rail);
+    border-color: var(--line);
+    color: var(--muted);
     cursor: not-allowed;
 }
 
