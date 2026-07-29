@@ -340,6 +340,12 @@ select:hover, input[type="date"]:hover, input[type="time"]:hover {
     background-color: var(--rail);
 }
 
+/* The list's closing rule and the stats' opening rule stacked into a
+   doubled hairline with a gap between them. The stats border carries it. */
+.task-row:last-child {
+    border-bottom: none;
+}
+
 .task-row::before {
     content: "";
     position: absolute;
@@ -615,5 +621,25 @@ select:hover, input[type="date"]:hover, input[type="time"]:hover {
 
     .task-row:hover {
         background-color: transparent;
+    }
+
+    /* Revealing Delete is not enough if it is a 25px-tall target. */
+    .delete-action {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        min-width: 44px;
+        padding: var(--s2) var(--s3);
+    }
+
+    .task-checkbox {
+        width: 22px;
+        height: 22px;
+        background-size: 14px 14px;
+    }
+
+    .sidebar-item {
+        min-height: 44px;
     }
 }
