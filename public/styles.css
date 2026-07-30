@@ -1,47 +1,47 @@
 /* ==========================================================================
    Design tokens
    One palette, one type scale, one spacing scale. Nothing off-scale.
-   Every text colour below is verified against WCAG AA on --paper or --rail.
+   Every text colour is verified against WCAG AA on its own ground.
    ========================================================================== */
 
 :root {
-    /* Colour — 6 neutrals + 1 accent + a 3-step priority ramp */
-    --ink:        #16191D;  /* primary text          17.18:1 on paper */
-    --paper:      #FCFCFB;  /* page ground */
-    --rail:       #F4F4F2;  /* sidebar, inset surfaces */
-    --line:       #E4E4E0;  /* hairlines */
-    --muted:      #5F6570;  /* metadata, labels       5.71:1 on paper */
-    --accent:     #0F6E5C;  /* the one saturated hue  6.01:1 on paper */
-    --accent-ink: #0B5546;  /* accent, pressed */
-    --accent-wash:#EAF2F0;  /* accent at rest, as a ground */
+    --ink:        #16191D;
+    --paper:      #FCFCFB;
+    --rail:       #F4F4F2;
+    --surface:    #FFFFFF;
+    --line:       #E4E4E0;
+    --line-soft:  #EFEFEC;
+    --muted:      #5F6570;
+    --accent:     #0F6E5C;
+    --accent-ink: #0B5546;
+    --accent-wash:#EAF2F0;
 
-    /* Priority ramp — all clear AA at 12px, unlike the reds they replace */
-    --prio-high:  #B3261E;  /* 6.37:1 */
-    --prio-med:   #8A5200;  /* 6.22:1 */
-    --prio-low:   #1F6B4A;  /* 6.27:1 */
+    --prio-high:  #B3261E;
+    --prio-med:   #8A5200;
+    --prio-low:   #1F6B4A;
+    --high-wash:  #FBECEB;
 
-    /* Type — 5 steps, 1.22 ratio */
-    --t-xs:    0.75rem;    /* 12px  mono metadata */
-    --t-sm:    0.8125rem;  /* 13px  UI labels */
-    --t-base:  0.9375rem;  /* 15px  task titles, body */
-    --t-md:    1.125rem;   /* 18px  subheads */
-    --t-lg:    1.75rem;    /* 28px  view title */
+    --t-xs:    0.75rem;
+    --t-sm:    0.8125rem;
+    --t-base:  0.9375rem;
+    --t-md:    1.125rem;
+    --t-lg:    1.75rem;
+    --t-xl:    2.25rem;
 
     --sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-    /* Space — 4px base, 8 steps */
     --s1: 4px;   --s2: 8px;   --s3: 12px;  --s4: 16px;
     --s5: 24px;  --s6: 32px;  --s7: 48px;  --s8: 64px;
 
-    /* Radius — two values, and only two */
-    --r:    6px;  /* controls */
-    --r-sm: 2px;  /* tokens, the priority spine */
+    --r:    6px;
+    --r-lg: 10px;
+    --r-sm: 2px;
 
+    --shadow: 0 1px 2px rgba(22, 25, 29, 0.04), 0 1px 3px rgba(22, 25, 29, 0.03);
     --ease: cubic-bezier(0.2, 0, 0.13, 1);
 }
 
-/* Base Reset & Typography */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -60,33 +60,98 @@ body {
     text-rendering: optimizeLegibility;
 }
 
-/* Numerals are data: tabular, so columns of times and counts line up */
-.task-meta, .stat-box, .priority-label {
-    font-family: var(--mono);
-    font-variant-numeric: tabular-nums;
+.icon {
+    width: 16px;
+    height: 16px;
+    display: block;
+    flex: none;
 }
 
-/* App Layout */
-.app-container {
+/* ==========================================================================
+   Shell
+   ========================================================================== */
+
+.app {
     display: grid;
-    grid-template-columns: 248px 1fr;
+    grid-template-columns: 264px 1fr;
     height: 100vh;
 }
 
-/* Sidebar */
+.main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--s5) var(--s6) var(--s8);
+}
+
+/* ==========================================================================
+   Sidebar
+   ========================================================================== */
+
 .sidebar {
     background-color: var(--rail);
     border-right: 1px solid var(--line);
     padding: var(--s5) var(--s3);
     display: flex;
     flex-direction: column;
+    gap: var(--s5);
+    overflow-y: auto;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    padding: 0 var(--s2);
+}
+
+/* The lambda is the whole identity: this is a functional-programming
+   showcase, so the mark says so rather than a generic checkmark. */
+.brand-mark {
+    width: 34px;
+    height: 34px;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--r);
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: var(--t-md);
+    font-weight: 500;
+    line-height: 1;
+}
+
+.brand-text { min-width: 0; }
+
+.brand-name {
+    font-size: var(--t-base);
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+}
+
+.brand-sub {
+    font-size: var(--t-xs);
+    color: var(--muted);
+    line-height: 1.3;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
     gap: 2px;
 }
 
-.sidebar-section-label {
-    margin-top: var(--s5);
-    margin-bottom: var(--s1);
-    padding: 0 var(--s3);
+.nav-label {
+    padding: var(--s3) var(--s2) var(--s1);
     font-size: var(--t-xs);
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -94,8 +159,11 @@ body {
     color: var(--muted);
 }
 
-.sidebar-item {
+.nav-item {
     position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
     padding: var(--s2) var(--s3);
     border-radius: var(--r);
     font-size: var(--t-sm);
@@ -106,64 +174,345 @@ body {
     transition: background-color 0.15s var(--ease), color 0.15s var(--ease);
 }
 
-.sidebar-item:hover {
-    background-color: rgba(22, 25, 29, 0.05);
-}
+.nav-item:hover { background-color: rgba(22, 25, 29, 0.05); }
 
-/* Active state is carried by an accent marker, not just a grey fill —
-   at 13px a background swap alone was too weak to locate at a glance. */
-.sidebar-item.active {
+.nav-item.active {
     background-color: var(--accent-wash);
     color: var(--accent);
     font-weight: 600;
 }
 
-.sidebar-item.active::before {
+.nav-item.active::before {
     content: "";
     position: absolute;
     left: 0;
     top: 50%;
     transform: translateY(-50%);
     width: 3px;
-    height: 16px;
+    height: 18px;
     border-radius: var(--r-sm);
     background-color: var(--accent);
 }
 
-/* Main Content Area */
-.main-content {
-    overflow-y: auto;
-    padding: var(--s7) var(--s6) var(--s8);
-    display: flex;
-    justify-content: center;
+.nav-icon { display: flex; color: var(--muted); }
+.nav-item.active .nav-icon { color: var(--accent); }
+
+.nav-text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.content-inner {
-    width: 100%;
-    max-width: 640px;   /* holds task titles to a ~68-character measure */
+/* Counts in mono so the column of numbers aligns down the rail. */
+.nav-count {
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
 }
+
+.nav-item.active .nav-count { color: var(--accent); }
+
+.nav-dot {
+    width: 8px;
+    height: 8px;
+    flex: none;
+    margin: 0 4px;
+    border-radius: 50%;
+}
+
+.dot-high   { background: var(--prio-high); }
+.dot-medium { background: var(--prio-med); }
+.dot-low    { background: var(--prio-low); }
+
+/* ==========================================================================
+   Top bar
+   ========================================================================== */
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s5);
+    padding: var(--s5) var(--s6);
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+    flex: none;
+}
+
+.topbar-heading { min-width: 0; }
 
 h1.view-title {
     font-size: var(--t-lg);
     font-weight: 600;
     letter-spacing: -0.02em;
-    line-height: 1.2;
-    margin-bottom: var(--s5);
+    line-height: 1.15;
     color: var(--ink);
 }
 
-/* Dynamic Add Task System
-   NB: `display` on .add-task-trigger and .add-task-form is driven by inline
-   style from Laminar (display <-- isAddingVar.signal), so it cannot be set
-   here — these rules must hold without owning the display property. */
+.view-sub {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    margin-top: 2px;
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+}
+
+.dot-sep { color: var(--line); }
+
+.search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 280px;
+    flex: none;
+}
+
+.search-icon {
+    position: absolute;
+    left: var(--s3);
+    display: flex;
+    color: var(--muted);
+    pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    padding: var(--s2) var(--s7) var(--s2) var(--s6);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    background: var(--rail);
+    font-family: var(--sans);
+    font-size: var(--t-sm);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s var(--ease), background-color 0.15s var(--ease);
+}
+
+.search-input::placeholder { color: var(--muted); }
+
+.search-input:hover { border-color: var(--muted); }
+
+.search-input:focus {
+    background: var(--surface);
+    border-color: var(--accent);
+}
+
+.search-input::-webkit-search-cancel-button { display: none; }
+
+.search-clear {
+    position: absolute;
+    right: var(--s2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--muted);
+    font-size: var(--t-md);
+    line-height: 1;
+    cursor: pointer;
+}
+
+.search-clear:hover { background: var(--line); color: var(--ink); }
+
+/* ==========================================================================
+   Stat tiles
+   ========================================================================== */
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--s3);
+    margin-bottom: var(--s5);
+}
+
+.stat {
+    position: relative;
+    padding: var(--s4);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+/* A tone bar rather than a coloured card: the number stays the loudest
+   thing in the tile, and four saturated panels would fight the task list. */
+.stat::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--line);
+}
+
+.stat-accent::before { background: var(--accent); }
+.stat-done::before   { background: var(--prio-low); }
+.stat-warn::before   { background: var(--prio-high); }
+
+.stat-value {
+    font-family: var(--mono);
+    font-size: var(--t-xl);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+}
+
+.stat-warn .stat-value { color: var(--prio-high); }
+
+.stat-label {
+    margin-top: var(--s1);
+    font-size: var(--t-xs);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+/* ==========================================================================
+   Two-column body
+   ========================================================================== */
+
+.columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: var(--s5);
+    align-items: start;
+}
+
+.col-main { min-width: 0; }
+
+.col-rail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s3);
+    position: sticky;
+    top: 0;
+}
+
+.card {
+    padding: var(--s4);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.card-title {
+    font-size: var(--t-xs);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: var(--s3);
+}
+
+.progress-figure {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+}
+
+.progress-value {
+    font-size: var(--t-xl);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.03em;
+}
+
+.progress-unit { font-size: var(--t-md); color: var(--muted); }
+
+.progress-track,
+.breakdown-track {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--rail);
+    overflow: hidden;
+}
+
+.progress-track { margin: var(--s3) 0 var(--s2); }
+
+.progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--accent);
+    transition: width 0.4s var(--ease);
+}
+
+.card-note {
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+}
+
+.breakdown-row {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    padding: var(--s2) 0;
+}
+
+.breakdown-row + .breakdown-row { border-top: 1px solid var(--line-soft); }
+
+.breakdown-label {
+    width: 58px;
+    flex: none;
+    font-size: var(--t-sm);
+}
+
+.breakdown-track { flex: 1; }
+
+.breakdown-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s var(--ease);
+}
+
+.fill-high   { background: var(--prio-high); }
+.fill-medium { background: var(--prio-med); }
+.fill-low    { background: var(--prio-low); }
+
+.breakdown-count {
+    width: 20px;
+    flex: none;
+    text-align: right;
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+}
+
+/* ==========================================================================
+   Add task
+   NB: `display` on the trigger and the form is driven by inline style from
+   Laminar, so these rules must hold without owning that property.
+   ========================================================================== */
+
 .add-task-trigger {
     align-items: center;
     gap: var(--s3);
-    padding: var(--s3);
-    margin-bottom: var(--s5);
-    border: 1px solid var(--line);
-    border-radius: var(--r);
-    background-color: transparent;
+    padding: var(--s3) var(--s4);
+    margin-bottom: var(--s4);
+    border: 1px dashed var(--line);
+    border-radius: var(--r-lg);
+    background: var(--surface);
     color: var(--muted);
     font-size: var(--t-base);
     cursor: pointer;
@@ -174,6 +523,7 @@ h1.view-title {
 
 .add-task-trigger:hover {
     border-color: var(--accent);
+    border-style: solid;
     background-color: var(--accent-wash);
     color: var(--accent);
 }
@@ -182,8 +532,8 @@ h1.view-title {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     flex: none;
     border-radius: 50%;
     background-color: var(--accent);
@@ -195,11 +545,11 @@ h1.view-title {
 
 .add-task-form {
     border: 1px solid var(--line);
-    border-radius: var(--r);
+    border-radius: var(--r-lg);
     padding: var(--s4);
-    margin-bottom: var(--s5);
-    background: #fff;
-    box-shadow: 0 1px 2px rgba(22, 25, 29, 0.04);
+    margin-bottom: var(--s4);
+    background: var(--surface);
+    box-shadow: var(--shadow);
 }
 
 .quick-add-input {
@@ -215,10 +565,7 @@ h1.view-title {
     color: var(--ink);
 }
 
-.quick-add-input::placeholder {
-    color: var(--muted);
-    font-weight: 400;
-}
+.quick-add-input::placeholder { color: var(--muted); font-weight: 400; }
 
 .advanced-options {
     display: flex;
@@ -228,10 +575,7 @@ h1.view-title {
     border-top: 1px solid var(--line);
 }
 
-.option-field {
-    flex: 1;
-    min-width: 140px;
-}
+.option-field { flex: 1; min-width: 140px; }
 
 .option-field label {
     display: block;
@@ -252,12 +596,10 @@ select, input[type="date"], input[type="time"] {
     font-size: var(--t-sm);
     background: var(--rail);
     color: var(--ink);
-    transition: border-color 0.15s var(--ease), background-color 0.15s var(--ease);
+    transition: border-color 0.15s var(--ease);
 }
 
-select {
-    font-family: var(--sans);
-}
+select { font-family: var(--sans); }
 
 select:hover, input[type="date"]:hover, input[type="time"]:hover {
     border-color: var(--muted);
@@ -283,28 +625,12 @@ select:hover, input[type="date"]:hover, input[type="time"]:hover {
     transition: background-color 0.15s var(--ease), border-color 0.15s var(--ease);
 }
 
-.btn-cancel {
-    background: transparent;
-    border-color: var(--line);
-    color: var(--muted);
-}
+.btn-cancel { background: transparent; border-color: var(--line); color: var(--muted); }
+.btn-cancel:hover { background: var(--rail); color: var(--ink); }
 
-.btn-cancel:hover {
-    background: var(--rail);
-    color: var(--ink);
-}
+.btn-submit { background: var(--accent); color: #fff; }
+.btn-submit:hover { background: var(--accent-ink); }
 
-.btn-submit {
-    background: var(--accent);
-    color: #fff;
-}
-
-.btn-submit:hover {
-    background: var(--accent-ink);
-}
-
-/* Disabled state was white on #fca5a5 — 1.90:1, effectively unreadable.
-   Now a flat neutral that states 'unavailable' at 5.71:1. */
 .btn-submit:disabled {
     background: var(--rail);
     border-color: var(--line);
@@ -313,47 +639,71 @@ select:hover, input[type="date"]:hover, input[type="time"]:hover {
 }
 
 /* ==========================================================================
-   Task rows — and the priority spine
-
-   The signature element: a 3px rule on the leading edge of every row,
-   coloured by priority. It is the only saturated colour in the interface,
-   which makes priority scannable down the left edge in one eye movement.
-   It also lets the priority text demote from shouting 10.4px uppercase to
-   quiet metadata — the text stays, so meaning is never carried by colour
-   alone.
+   Task list
    ========================================================================== */
 
+.task-list { display: flex; flex-direction: column; }
+
+.group-header {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    margin: var(--s4) 0 var(--s2);
+}
+
+.task-list > .group-header:first-child { margin-top: 0; }
+
+.group-name {
+    font-size: var(--t-xs);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex: none;
+}
+
+.group-overdue .group-name { color: var(--prio-high); }
+
+.group-rule { flex: 1; height: 1px; background: var(--line); }
+
+.group-count {
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    flex: none;
+}
+
+/* Rows are cards now. At two tasks a bare list read as an unfinished page;
+   a bounded surface gives the content weight without adding decoration. */
 .task-row {
     position: relative;
     display: flex;
     align-items: flex-start;
     gap: var(--s3);
     padding: var(--s3) var(--s3) var(--s3) var(--s4);
-    border-bottom: 1px solid var(--line);
-    border-radius: var(--r-sm);
+    margin-bottom: var(--s2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    background: var(--surface);
     cursor: pointer;
-    transition: background-color 0.15s var(--ease);
+    overflow: hidden;
+    transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
 }
 
-/* The row claimed cursor:pointer but gave no feedback at all on hover. */
 .task-row:hover {
-    background-color: var(--rail);
+    border-color: #D6D6D1;
+    box-shadow: var(--shadow);
 }
 
-/* The list's closing rule and the stats' opening rule stacked into a
-   doubled hairline with a gap between them. The stats border carries it. */
-.task-row:last-child {
-    border-bottom: none;
-}
-
+/* The priority spine: the only saturated colour on a row. */
 .task-row::before {
     content: "";
     position: absolute;
     left: 0;
-    top: var(--s3);
-    bottom: var(--s3);
+    top: 0;
+    bottom: 0;
     width: 3px;
-    border-radius: var(--r-sm);
     background-color: var(--line);
     transition: background-color 0.2s var(--ease);
 }
@@ -362,16 +712,10 @@ select:hover, input[type="date"]:hover, input[type="time"]:hover {
 .task-row--medium::before { background-color: var(--prio-med); }
 .task-row--low::before    { background-color: var(--prio-low); }
 
-/* Done work recedes: the spine desaturates, so completion reads
-   peripherally without needing to parse the strikethrough. */
-.task-row.completed::before {
-    background-color: var(--line);
-}
+.task-row.completed { background: var(--rail); }
+.task-row.completed::before { background-color: var(--line); }
 
-.task-checkbox-wrapper {
-    padding-top: 1px;
-    flex: none;
-}
+.task-checkbox-wrapper { padding-top: 2px; flex: none; }
 
 .task-checkbox {
     appearance: none;
@@ -382,14 +726,12 @@ select:hover, input[type="date"]:hover, input[type="time"]:hover {
     flex: none;
     border: 1.5px solid var(--muted);
     border-radius: var(--r-sm);
-    background-color: #fff;
+    background-color: var(--surface);
     cursor: pointer;
     transition: background-color 0.15s var(--ease), border-color 0.15s var(--ease);
 }
 
-.task-checkbox:hover {
-    border-color: var(--accent);
-}
+.task-checkbox:hover { border-color: var(--accent); }
 
 .task-checkbox:checked {
     background-color: var(--accent);
@@ -400,10 +742,7 @@ select:hover, input[type="date"]:hover, input[type="time"]:hover {
     background-size: 12px 12px;
 }
 
-.task-body {
-    flex-grow: 1;
-    min-width: 0;   /* lets long unbroken titles wrap instead of overflowing */
-}
+.task-body { flex-grow: 1; min-width: 0; }
 
 .task-title {
     font-size: var(--t-base);
@@ -421,40 +760,39 @@ select:hover, input[type="date"]:hover, input[type="time"]:hover {
 }
 
 .task-meta {
-    font-size: var(--t-xs);
-    line-height: 1.4;
-    color: var(--muted);
     display: flex;
     flex-wrap: wrap;
-    gap: var(--s1) var(--s3);
     align-items: center;
+    gap: var(--s1) var(--s3);
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
+    color: var(--muted);
 }
 
-.priority-label {
-    font-size: var(--t-xs);
-    font-weight: 500;
-}
+.priority-label { font-size: var(--t-xs); font-weight: 500; }
 
 .priority-high   { color: var(--prio-high); }
 .priority-medium { color: var(--prio-med); }
 .priority-low    { color: var(--prio-low); }
 
-.task-row.completed .priority-label {
-    color: var(--muted);
+.task-row.completed .priority-label { color: var(--muted); }
+
+.overdue-chip {
+    padding: 1px var(--s2);
+    border-radius: 999px;
+    background: var(--high-wash);
+    color: var(--prio-high);
+    font-family: var(--sans);
+    font-size: var(--t-xs);
+    font-weight: 600;
 }
 
-.task-actions {
-    flex: none;
-    opacity: 0;
-    transition: opacity 0.15s var(--ease);
-}
+.task-actions { flex: none; opacity: 0; transition: opacity 0.15s var(--ease); }
 
-/* :focus-within matters — the button stayed focusable at opacity 0, so
-   keyboard focus landed on a control that was nowhere on screen. */
 .task-row:hover .task-actions,
-.task-row:focus-within .task-actions {
-    opacity: 1;
-}
+.task-row:focus-within .task-actions { opacity: 1; }
 
 .delete-action {
     background: none;
@@ -469,70 +807,64 @@ select:hover, input[type="date"]:hover, input[type="time"]:hover {
     transition: color 0.15s var(--ease), background-color 0.15s var(--ease);
 }
 
-.delete-action:hover {
-    color: var(--prio-high);
-    background: rgba(179, 38, 30, 0.08);
-}
+.delete-action:hover { color: var(--prio-high); background: var(--high-wash); }
 
-/* Empty state
-   Was #9ca3af centred in dead space at 2.54:1 — the least readable text on
-   the page, in the one state where the copy is all there is to read. */
+/* ==========================================================================
+   Empty state
+   ========================================================================== */
+
 .empty-state {
-    padding: var(--s7) var(--s5);
-    text-align: center;
-    color: var(--muted);
-    font-size: var(--t-sm);
-    background-color: var(--rail);
-    border-radius: var(--r);
-}
-
-/* Stats
-   Previously margin-top:60px regardless of content, so on an empty list the
-   counters floated alone in whitespace. Now anchored to the list it counts. */
-.stats-summary {
-    margin-top: var(--s5);
-    padding-top: var(--s4);
-    border-top: 1px solid var(--line);
     display: flex;
-    gap: var(--s5);
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--s8) var(--s5);
+    border: 1px dashed var(--line);
+    border-radius: var(--r-lg);
+    background: var(--surface);
 }
 
-.stat-box {
-    font-size: var(--t-xs);
+.empty-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-bottom: var(--s3);
+    border-radius: 50%;
+    background: var(--accent-wash);
+    color: var(--accent);
+}
+
+.empty-mark .icon { width: 20px; height: 20px; }
+
+.empty-heading { font-size: var(--t-base); font-weight: 600; color: var(--ink); }
+
+.empty-body {
+    margin-top: 2px;
+    font-size: var(--t-sm);
     color: var(--muted);
-}
-
-.stat-box strong {
-    color: var(--ink);
-    font-weight: 500;
+    max-width: 34ch;
 }
 
 /* ==========================================================================
    Focus & motion
    ========================================================================== */
 
-/* One focus treatment, applied everywhere, on the accent so it is never
-   mistaken for a hover or selected state. There were no focus styles at
-   all before, and .quick-add-input actively removed its outline. */
 :focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
     border-radius: var(--r-sm);
 }
 
-.quick-add-input:focus-visible {
-    outline-offset: 4px;
-}
-
-.sidebar-item:focus-visible {
-    outline-offset: -2px;   /* keeps the ring inside the 12px rail gutter */
-}
+.search-input:focus-visible { outline-offset: 1px; }
+.quick-add-input:focus-visible { outline-offset: 4px; }
+.nav-item:focus-visible { outline-offset: -2px; }
 
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         transition-duration: 0.01ms !important;
         animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
         scroll-behavior: auto !important;
     }
 }
@@ -541,105 +873,85 @@ select:hover, input[type="date"]:hover, input[type="time"]:hover {
    Responsive
    ========================================================================== */
 
-@media (max-width: 768px) {
-    .app-container {
-        grid-template-columns: 1fr;
-        height: auto;
-        overflow-y: auto;
+/* Below this the rail costs more than it gives — the list needs the width. */
+@media (max-width: 1120px) {
+    .columns { grid-template-columns: minmax(0, 1fr); }
+
+    .col-rail {
+        position: static;
+        flex-direction: row;
+        flex-wrap: wrap;
     }
 
-    body {
-        height: auto;
-        overflow-y: auto;
-    }
+    .col-rail .card { flex: 1; min-width: 240px; }
+}
 
-    /* The rail was `overflow-x: auto; white-space: nowrap`, which clipped
-       'High Priority' at the viewport edge with no scroll affordance and
-       swept the 'Priority' label — styled for a vertical list — into the
-       middle of the scroller. Wrapping instead: every filter stays visible,
-       the label breaks its own row, and nothing scrolls sideways. */
+@media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; height: auto; overflow-y: auto; }
+
+    body { height: auto; overflow-y: auto; }
+
+    .main { overflow: visible; }
+
+    .content { overflow: visible; padding: var(--s4) var(--s4) var(--s7); }
+
     .sidebar {
         border-right: none;
         border-bottom: 1px solid var(--line);
         padding: var(--s3);
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: var(--s1);
+        gap: var(--s3);
+        overflow: visible;
     }
 
-    .sidebar-section-label {
-        flex-basis: 100%;
-        margin-top: var(--s2);
-        margin-bottom: 0;
-        padding: 0 var(--s2);
+    .brand { padding: var(--s1) var(--s2); }
+
+    /* Wrapping, never a horizontal scroller: every filter stays visible. */
+    .nav { flex-direction: row; flex-wrap: wrap; gap: var(--s1); }
+
+    .nav-label { flex-basis: 100%; padding: var(--s2) var(--s2) 0; }
+
+    .nav-item { min-height: 40px; border: 1px solid transparent; }
+
+    .nav-item.active { border-color: var(--accent); }
+    .nav-item.active::before { content: none; }
+
+    .nav-text { flex: 0 1 auto; }
+
+    .topbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--s3);
+        padding: var(--s4);
     }
 
-    .sidebar-item {
-        padding: var(--s2) var(--s3);
-        font-size: var(--t-sm);
-        border: 1px solid transparent;
-        min-height: 36px;
-        display: flex;
-        align-items: center;
-    }
+    .search { width: 100%; }
+}
 
-    /* The 3px marker is a left-edge device; as a chip it reads as damage. */
-    .sidebar-item.active::before {
-        content: none;
-    }
-
-    .sidebar-item.active {
-        border-color: var(--accent);
-    }
-
-    .main-content {
-        padding: var(--s5) var(--s4) var(--s7);
-    }
+@media (max-width: 620px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 420px) {
-    h1.view-title {
-        font-size: 1.5rem;
-    }
-
-    .option-field {
-        min-width: 100%;   /* date/time/priority stack rather than squeeze */
-    }
-
+    h1.view-title { font-size: 1.5rem; }
+    .stat-value, .progress-value { font-size: 1.75rem; }
+    .option-field { min-width: 100%; }
     .add-task-actions .btn-cancel,
-    .add-task-actions .btn-submit {
-        flex: 1;           /* full-width targets at the narrowest sizes */
-    }
+    .add-task-actions .btn-submit { flex: 1; }
 }
 
-/* Touch: hover never fires, so an opacity:0 Delete revealed only on hover
-   was undiscoverable — the control existed but could not be reached. */
 @media (hover: none) {
-    .task-actions {
-        opacity: 1;
-    }
+    .task-actions { opacity: 1; }
+    .task-row:hover { border-color: var(--line); box-shadow: none; }
 
-    .task-row:hover {
-        background-color: transparent;
-    }
-
-    /* Revealing Delete is not enough if it is a 25px-tall target. */
     .delete-action {
         display: flex;
         align-items: center;
         justify-content: center;
         min-height: 44px;
         min-width: 44px;
-        padding: var(--s2) var(--s3);
     }
 
-    .task-checkbox {
-        width: 22px;
-        height: 22px;
-        background-size: 14px 14px;
-    }
+    .task-checkbox { width: 22px; height: 22px; background-size: 14px 14px; }
 
-    .sidebar-item {
-        min-height: 44px;
-    }
+    .nav-item { min-height: 44px; }
 }
