@@ -113,6 +113,8 @@ object Main {
   def dayLabel(date: TaskDate, today: TaskDate, tomorrow: TaskDate): String =
     if (date.ordinal == today.ordinal) "Today"
     else if (date.ordinal == tomorrow.ordinal) "Tomorrow"
+    // Say it in words: the red heading alone would encode this by colour only.
+    else if (date.ordinal < today.ordinal) s"Overdue · ${date.toDisplayString}"
     else date.toDisplayString
 
   def viewName(view: SidebarView): String = view match {
