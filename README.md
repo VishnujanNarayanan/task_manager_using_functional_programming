@@ -1,8 +1,51 @@
-# Functional Task Manager (Scala.js)
+<h1 align="center">Functional Task Manager</h1>
 
-### 🚀 [Live Demo: Try the Application Here](https://task-manager-using-functional-progr.vercel.app/)
+<p align="center">
+  A browser task planner written in Scala 3 and compiled to JavaScript —<br>
+  immutable state, pure transformations, and a UI that is a function of a reactive signal.
+</p>
 
-A professional, frontend-only productivity web application built using Scala.js and Laminar. This project transforms a basic task list into a modern planner, explicitly demonstrating the practical application of functional programming paradigms in a reactive UI architecture.
+<p align="center">
+  <img alt="Scala" src="https://img.shields.io/badge/Scala-3.3.3-DC322F?logo=scala&logoColor=white"/>
+  <img alt="Scala.js" src="https://img.shields.io/badge/Scala.js-1.16-CC3E44?logo=scala&logoColor=white"/>
+  <img alt="Laminar" src="https://img.shields.io/badge/Laminar-17.0-6E56CF"/>
+  <img alt="sbt" src="https://img.shields.io/badge/sbt-1.10.7-000000?logo=scala&logoColor=white"/>
+  <img alt="Vercel" src="https://img.shields.io/badge/Vercel-deployed-000000?logo=vercel&logoColor=white"/>
+  <img alt="Paradigm" src="https://img.shields.io/badge/Paradigm-Purely_Functional-5B21B6"/>
+  <img alt="License" src="https://img.shields.io/badge/License-MIT-750014"/>
+  <br>
+  <a href="https://task-manager-using-functional-progr.vercel.app/"><img alt="Live Demo" src="https://img.shields.io/badge/Live_Demo-Try_it-3FB950?style=for-the-badge&logo=vercel&logoColor=white"/></a>
+  <br>
+  <a href="https://github.com/VishnujanNarayanan"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-VishnujanNarayanan-181717?logo=github&logoColor=white&style=for-the-badge"/></a>
+  <a href="https://www.linkedin.com/in/vishnujan-narayanan"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-Vishnujan_Narayanan-0A66C2?logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0yMC40NDcgMjAuNDUyaC0zLjU1NHYtNS41NjljMC0xLjMyOC0uMDI3LTMuMDM3LTEuODUyLTMuMDM3LTEuODUzIDAtMi4xMzYgMS40NDUtMi4xMzYgMi45Mzl2NS42NjdIOS4zNTFWOWgzLjQxNHYxLjU2MWguMDQ2Yy40NzctLjkgMS42MzctMS44NSAzLjM3LTEuODUgMy42MDEgMCA0LjI2NyAyLjM3IDQuMjY3IDUuNDU1djYuMjg2ek01LjMzNyA3LjQzM2MtMS4xNDQgMC0yLjA2My0uOTI2LTIuMDYzLTIuMDY1IDAtMS4xMzguOTItMi4wNjMgMi4wNjMtMi4wNjMgMS4xNCAwIDIuMDY0LjkyNSAyLjA2NCAyLjA2MyAwIDEuMTM5LS45MjUgMi4wNjUtMi4wNjQgMi4wNjV6bTEuNzgyIDEzLjAxOUgzLjU1NVY5aDMuNTY0djExLjQ1MnpNMjIuMjI1IDBIMS43NzFDLjc5MiAwIDAgLjc3NCAwIDEuNzI5djIwLjU0MkMwIDIzLjIyNy43OTIgMjQgMS43NzEgMjRoMjAuNDUxQzIzLjIgMjQgMjQgMjMuMjI3IDI0IDIyLjI3MVYxLjcyOUMyNCAuNzc0IDIzLjIgMCAyMi4yMjIgMGguMDAzeiIvPjwvc3ZnPg%3D%3D&logoColor=white&style=for-the-badge"/></a>
+  <a href="https://substack.com/@vishnujannarayanan"><img alt="Substack" src="https://img.shields.io/badge/Substack-@vishnujannarayanan-FF6719?logo=substack&logoColor=white&style=for-the-badge"/></a>
+</p>
+
+<p align="center">
+  🎯 <a href="#why-this-project-exists">Why</a> ·
+  🧮 <a href="#-functional-programming-usage">FP Usage</a> ·
+  🧩 <a href="#architecture">Architecture</a> ·
+  ✨ <a href="#-features">Features</a> ·
+  ⚡ <a href="#installation">Installation</a> ·
+  🚀 <a href="#-deployment-vercel">Deployment</a> ·
+  ⚠️ <a href="#limitations">Limitations</a>
+</p>
+
+---
+
+## Why this project exists
+
+Functional programming is usually demonstrated on problems that are already pure — sorting,
+parsing, folding a list. A user interface is the awkward case: it is stateful by nature, and the
+DOM is one large mutable object.
+
+This project takes that case head on. The entire application is a `List[Task]` in a reactive
+variable, a handful of pure functions that map one list to another, and a UI expressed as a
+transformation of that signal. Nothing mutates a task, and no code touches the DOM directly. It
+runs in a browser because Scala 3 compiles to JavaScript through Scala.js.
+
+The sections below are the point of the repository: each functional-programming concept is shown
+against the actual code that uses it.
 
 ---
 
@@ -131,6 +174,172 @@ div(cls := "stat-box", "Pending: ", strong(child.text <-- tasksVar.signal.map(_.
 
 ---
 
+## Architecture
+
+Unidirectional data flow. State is one `Var`; the UI is a pure projection of it.
+
+```mermaid
+flowchart LR
+    subgraph State["Reactive state"]
+        TV["tasksVar: Var[List[Task]]"]
+        SV["selectedViewVar: Var[SidebarView]"]
+    end
+
+    subgraph Pure["Pure functions — List[Task] in, List[Task] out"]
+        AT["addTask"]
+        TT["toggleTask"]
+        DT["deleteTask"]
+        ST["sortTasks"]
+        FT["filterTasksForView"]
+    end
+
+    UI["Laminar DOM"] -->|user event| AT & TT & DT
+    AT & TT & DT -->|new list| TV
+    TV --> COMB["combineWith"]
+    SV --> COMB
+    COMB --> ST --> FT --> UI
+
+    style Pure fill:none,stroke:#6E56CF
+```
+
+An event never mutates a task. It calls a pure function that returns a **new** list, writes that
+to `tasksVar`, and the signal propagates. `filterTasksForView` derives what is shown; no view
+state is stored separately, so the sidebar and the list can never disagree.
+
+## Project Structure
+
+```
+functional_programming/
+├── src/main/scala/Main.scala   # The whole application — models, pure functions, Laminar UI
+├── public/
+│   ├── index.html              # Mount point (#app) + script tag
+│   ├── styles.css              # Hand-written CSS, IBM Plex type
+│   └── main.js                 # Compiled output — written by build.sh, not by hand
+├── build.sbt                   # Scala 3.3.3, Scala.js plugin, Laminar 17
+├── project/
+│   ├── build.properties        # sbt version — single source of truth
+│   └── plugins.sbt             # sbt-scalajs 1.16
+├── build.sh                    # Version-locked toolchain install + fullLinkJS + copy
+├── vercel.json                 # buildCommand + outputDirectory
+└── README.md
+```
+
+The application is a single 506-line `Main.scala`. Models, state transformations, and rendering
+all live there, separated by section rather than by file.
+
+## Installation
+
+Requires a JDK (17 recommended) and [sbt](https://www.scala-sbt.org/). Scala itself is fetched by
+sbt.
+
+```bash
+git clone git@github.com:VishnujanNarayanan/task_manager_using_functional_programming.git
+cd task_manager_using_functional_programming
+```
+
+### Development build
+
+```bash
+sbt fastLinkJS
+```
+
+Then copy the linked bundle into `public/` and serve it:
+
+```bash
+cp target/scala-3.3.3/*-fastopt/main.js public/
+cd public && python -m http.server 8000
+```
+
+Open <http://localhost:8000>.
+
+### Production build
+
+```bash
+bash build.sh
+```
+
+This is exactly what Vercel runs. It installs a pinned coursier and the sbt version read from
+`project/build.properties`, runs `fullLinkJS`, locates the linked bundle under `target/`, and
+copies it to `public/main.js`.
+
+### Watch mode
+
+```bash
+sbt ~fastLinkJS
+```
+
+Recompiles on save. The copy step still has to be repeated, or symlinked once.
+
+## Design Decisions
+
+**The build toolchain is version-locked, and that was a bug fix.** `build.sh` previously fetched
+coursier from `/releases/latest` and installed sbt unpinned, so the toolchain was whatever
+happened to be current on the day of the deploy. When sbt 2.x shipped — requiring JDK 17 while
+the deploy image provided JDK 11 — the build broke with no change to the repository. Coursier is
+now pinned to `v2.1.24`, and the sbt version is *derived from* `project/build.properties` rather
+than duplicated, so the installed launcher and the sbt that runs the build cannot drift apart.
+
+**The bundle path is discovered, not hardcoded.** The linked output lives under
+`target/scala-3.3.3/...`. `build.sh` runs `find target -type f -path '*-opt/main.js'` instead of
+hardcoding the Scala version, so bumping `scalaVersion` in `build.sbt` does not fail at the copy
+step after a full successful compile.
+
+**No framework, no bundler, no `node_modules`.** `index.html` is 17 lines: a `#app` div and a
+script tag. Laminar renders into it. There is no webpack, no npm, and no runtime JavaScript
+dependency beyond the compiled bundle.
+
+**Sorting and filtering are derived, never stored.** `sortTasks` and `filterTasksForView` run on
+every signal emission. Caching them would introduce a second source of truth that could fall out
+of sync with `tasksVar`.
+
+**`SidebarView` is an enum matched exhaustively.** Adding a view without handling it is a compiler
+error, not a silently empty list.
+
 ## 🚀 Deployment (Vercel)
 
 This project is configured for seamless deployment on Vercel. Connect the GitHub repository to Vercel, and it will automatically use `vercel.json` and `build.sh` to compile the Scala application into JavaScript and serve it from the `public` directory.
+
+| Setting | Value | Where |
+|---|---|---|
+| Build command | `bash build.sh` | `vercel.json` |
+| Output directory | `public` | `vercel.json` |
+| Framework preset | none | `vercel.json` |
+
+## Limitations
+
+- **No persistence.** State lives in memory only; a refresh restores the hardcoded initial task
+  list.
+- **No editing.** Tasks can be created, toggled, and deleted — not renamed or rescheduled.
+- **Everything is in one 506-line file.** Models, transformations, and rendering would be clearer
+  split into `Models.scala`, `Logic.scala`, and `Ui.scala`.
+- **`public/main.js` is committed** even though it is generated by the build.
+- **IDs are assigned by a counter**, which would collide if state were ever persisted and reloaded.
+- **The dev build requires a manual copy** of the linked bundle into `public/`.
+- **`TaskDate` has no validation** — nothing rejects 31 February.
+- **Single user, single device, no backend.**
+
+## Roadmap
+
+- Persist tasks to `localStorage`, keeping the codec pure.
+- Task editing.
+- Split `Main.scala` into models, logic, and UI modules.
+- Gitignore `public/main.js` and rely on the build.
+- Validate dates through a smart constructor returning `Either`.
+- Recurring tasks and tags.
+
+## License
+
+Released under the MIT License — free to use, modify and distribute, with attribution and
+without warranty.
+
+## Author
+
+<p align="center">
+  <strong>Vishnujan Narayanan</strong>
+</p>
+
+<p align="center">
+  <a href="https://github.com/VishnujanNarayanan"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-VishnujanNarayanan-181717?logo=github&logoColor=white&style=for-the-badge"/></a>
+  <a href="https://www.linkedin.com/in/vishnujan-narayanan"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-Vishnujan_Narayanan-0A66C2?logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0yMC40NDcgMjAuNDUyaC0zLjU1NHYtNS41NjljMC0xLjMyOC0uMDI3LTMuMDM3LTEuODUyLTMuMDM3LTEuODUzIDAtMi4xMzYgMS40NDUtMi4xMzYgMi45Mzl2NS42NjdIOS4zNTFWOWgzLjQxNHYxLjU2MWguMDQ2Yy40NzctLjkgMS42MzctMS44NSAzLjM3LTEuODUgMy42MDEgMCA0LjI2NyAyLjM3IDQuMjY3IDUuNDU1djYuMjg2ek01LjMzNyA3LjQzM2MtMS4xNDQgMC0yLjA2My0uOTI2LTIuMDYzLTIuMDY1IDAtMS4xMzguOTItMi4wNjMgMi4wNjMtMi4wNjMgMS4xNCAwIDIuMDY0LjkyNSAyLjA2NCAyLjA2MyAwIDEuMTM5LS45MjUgMi4wNjUtMi4wNjQgMi4wNjV6bTEuNzgyIDEzLjAxOUgzLjU1NVY5aDMuNTY0djExLjQ1MnpNMjIuMjI1IDBIMS43NzFDLjc5MiAwIDAgLjc3NCAwIDEuNzI5djIwLjU0MkMwIDIzLjIyNy43OTIgMjQgMS43NzEgMjRoMjAuNDUxQzIzLjIgMjQgMjQgMjMuMjI3IDI0IDIyLjI3MVYxLjcyOUMyNCAuNzc0IDIzLjIgMCAyMi4yMjIgMGguMDAzeiIvPjwvc3ZnPg%3D%3D&logoColor=white&style=for-the-badge"/></a>
+  <a href="https://substack.com/@vishnujannarayanan"><img alt="Substack" src="https://img.shields.io/badge/Substack-@vishnujannarayanan-FF6719?logo=substack&logoColor=white&style=for-the-badge"/></a>
+</p>
