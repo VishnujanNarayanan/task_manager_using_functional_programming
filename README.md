@@ -11,6 +11,7 @@
   <img alt="Laminar" src="https://img.shields.io/badge/Laminar-17.0-6E56CF"/>
   <img alt="sbt" src="https://img.shields.io/badge/sbt-1.10.7-000000?logo=scala&logoColor=white"/>
   <img alt="Vercel" src="https://img.shields.io/badge/Vercel-deployed-000000?logo=vercel&logoColor=white"/>
+  <a href="https://github.com/VishnujanNarayanan/task_manager_using_functional_programming/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/VishnujanNarayanan/task_manager_using_functional_programming/actions/workflows/ci.yml/badge.svg"/></a>
   <img alt="Paradigm" src="https://img.shields.io/badge/Paradigm-Purely_Functional-5B21B6"/>
   <img alt="License" src="https://img.shields.io/badge/License-MIT-750014"/>
   <br>
@@ -262,6 +263,18 @@ This is exactly what Vercel runs. It installs a pinned coursier and the sbt vers
 `project/build.properties`, runs `fullLinkJS`, locates the linked bundle under `target/`, and
 copies it to `public/main.js`.
 
+### Tests
+
+```bash
+sbt test
+```
+
+Runs the munit suite in `src/test/scala/` under Node.js. It covers the pure half of the
+application — every `List[Task] => List[Task]` transformation and every derivation the
+dashboard reads — with no DOM and no test double, because none of those functions need
+one. Several cases assert the immutability claim directly, by checking the input list is
+unchanged after the transformation returns.
+
 ### Watch mode
 
 ```bash
@@ -294,6 +307,14 @@ of sync with `tasksVar`.
 
 **`SidebarView` is an enum matched exhaustively.** Adding a view without handling it is a compiler
 error, not a silently empty list.
+
+**CI runs the same compile, test and link that the deploy does.** The one production
+incident this repository has had was a build that broke in *deploy* rather than in review
+— an unpinned sbt, a new major version, and a JDK mismatch on the deploy image, with no
+change to the repository at all. `.github/workflows/ci.yml` now runs `sbt test` and
+`sbt fullLinkJS` on every push and every pull request, so that class of failure surfaces
+as a red check instead of a dead site. Linking is a separate step from testing on purpose:
+a Scala.js project can compile cleanly and still fail to link.
 
 ## 🚀 Deployment (Vercel)
 
