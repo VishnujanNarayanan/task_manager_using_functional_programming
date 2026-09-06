@@ -44,13 +44,17 @@ object Main {
   private val tomorrowJs = new Date(now.getTime() + 86400000.0)
   private val tomorrowDate = TaskDate(tomorrowJs.getFullYear().toInt, tomorrowJs.getMonth().toInt, tomorrowJs.getDate().toInt)
 
-  private val tasksVar = Var(List(
+  // Shown on a first visit only. Once anything has been stored, that wins --
+  // including an empty list, which is a visitor who deleted everything rather
+  // than a visitor who has never been here.
+  private val seedTasks = List(
     Task(1, "Welcome to your Planner! Click me to complete", todayDate, TaskTime(9, 0), Priority.High, false),
-    Task(2, "Add your first task using the button above", TaskDate(todayDate.year, todayDate.month, todayDate.day + 1), TaskTime(10, 0), Priority.Medium, false)
-  ))
+    Task(2, "Add your first task using the button above", tomorrowDate, TaskTime(10, 0), Priority.Medium, false)
+  )
+
+  private val tasksVar = Var(TaskStorage.load().getOrElse(seedTasks))
 
   private val selectedViewVar = Var(SidebarView.Tasks)
-  private val nextIdVar = Var(3)
   private val queryVar = Var("")
 
   def addTask(tasks: List[Task], title: String, date: TaskDate, time: TaskTime, priority: Priority, id: Int): List[Task] =
@@ -166,6 +170,9 @@ object Main {
     val summarySignal = tasksVar.signal.map(ts => summarise(ts, todayDate))
 
     div(cls := "app",
+      // The write edge. Signals emit their current value on subscribe, so this
+      // also establishes the key on a first visit.
+      tasksVar.signal --> { tasks => TaskStorage.save(tasks) },
       renderSidebar(summarySignal),
       mainTag(cls := "main",
         renderTopBar(),
@@ -386,10 +393,8 @@ object Main {
         val date = dateVar.now()
         val time = timeVar.now()
         val priority = priorityVar.now()
-        val id = nextIdVar.now()
 
-        tasksVar.update(ts => addTask(ts, title, date, time, priority, id))
-        nextIdVar.update(_ + 1)
+        tasksVar.update(ts => addTask(ts, title, date, time, priority, TaskCodec.nextId(ts)))
 
         resetForm()
         selectedViewVar.set(SidebarView.Tasks)
