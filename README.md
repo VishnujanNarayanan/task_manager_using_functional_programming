@@ -213,7 +213,7 @@ state is stored separately, so the sidebar and the list can never disagree.
 functional_programming/
 ├── src/main/scala/
 │   ├── Main.scala              # Models, pure functions, Laminar UI
-│   ├── TaskCodec.scala         # Pure, total encode/decode + nextId derivation
+│   ├── TaskCodec.scala         # Pure: encode/decode, nextId, storage decisions
 │   └── TaskStorage.scala       # The only code that touches the browser
 ├── public/
 │   ├── index.html              # Mount point (#app) + script tag
@@ -321,6 +321,21 @@ swallows failure deliberately: `localStorage` throws when storage is disabled, w
 private mode forbids it, or when the origin's quota is gone, and an unguarded write would
 take `addTask` down for those visitors. Everything between the two edges is unchanged.
 
+**Two tabs converge rather than clobber.** Each tab holds its own list and writes the
+whole thing, so without co-ordination a tab that never saw a task added elsewhere deletes
+it on its next write. Tabs now adopt each other's writes through the `storage` event, which
+never fires in the tab that performed the write. The adoption is guarded by an equality
+check, and that guard is load bearing rather than an optimisation: adopting causes this tab
+to write, which raises an event in the tab that sent it, which would adopt and write back
+forever -- comparing first means the second tab sees a value it already holds and stops.
+
+**A payload we cannot read is quarantined, not discarded.** Falling straight back to the
+seed list meant the next write overwrote data that had merely failed to parse. `load`
+reports `Unreadable` separately from `Empty` and moves the bytes to a second key first --
+only when nothing is quarantined already, so the first failure, the one still holding the
+original data, is the one that survives. The UI says so rather than starting fresh in
+silence.
+
 **The id counter was deleted rather than persisted.** `nextIdVar` was a second source of
 truth, and persisting it would have been the bug: reload with a counter reset to its
 initial value and the next task takes an id that already exists, after which `toggleTask`
@@ -350,6 +365,16 @@ This project is configured for seamless deployment on Vercel. Connect the GitHub
 - **Persistence is per browser.** Tasks are stored in `localStorage`, so they survive a
   refresh but do not follow you to another device or another browser. There is no account
   and no sync.
+- **Simultaneous edits in two tabs are last-write-wins.** Tabs adopt each other's writes
+  through the `storage` event, so a tab no longer deletes work it never saw. Two edits
+  inside the event's delivery window still resolve to whichever wrote last.
+- **Storage can disappear without warning.** Clearing site data removes everything, and
+  Safari's tracking prevention caps script-writable storage at seven days without
+  interaction. There is no export, no backup and no warning before that happens.
+- **A failed save is silent.** Writes are swallowed so a disabled or exhausted store cannot
+  crash the app, which means a visitor whose quota is gone keeps typing into nothing.
+- **Task titles sit in plaintext on disk.** On a shared machine that is worse than the old
+  behaviour, where closing the tab erased everything. There is no in-app control to clear it.
 - **No editing.** Tasks can be created, toggled, and deleted — not renamed or rescheduled.
 - **`Main.scala` is still 511 lines.** Models, transformations and rendering would be clearer
   split into `Models.scala`, `Logic.scala` and `Ui.scala`, the way persistence now is.

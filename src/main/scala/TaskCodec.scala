@@ -17,6 +17,21 @@ enum DecodeError:
   case WrongShape(message: String)
   case UnsupportedVersion(found: Int)
 
+/** What was found in storage at startup.
+  *
+  * `Empty` and `Loaded(Nil)` are deliberately different: nothing stored is a
+  * first visit and gets the seed list, whereas an empty list is somebody who
+  * deleted every task and must not have the seeds pushed back at them.
+  *
+  * `Unreadable` exists because discarding is not good enough. Falling straight
+  * back to the seeds means the next edit writes over a payload we merely failed
+  * to parse -- the data was recoverable right up until we quietly destroyed it.
+  */
+enum LoadResult:
+  case Loaded(tasks: List[Task])
+  case Empty
+  case Unreadable(error: DecodeError)
+
 /** Pure, total translation between `List[Task]` and the string that goes into
   * storage. No I/O happens here -- see `TaskStorage` for that. Keeping the two
   * apart is what lets the whole codec be unit-tested with no browser.
@@ -136,4 +151,33 @@ object TaskCodec {
         .find(_.toString == name)
         .toRight(DecodeError.WrongShape(s"unknown priority '$name'"))
     }
+
+  // --- storage decisions, kept pure so they can be tested without a browser --
+
+  /** What a raw stored value means. `None` is nothing stored at all. */
+  def interpretLoad(raw: Option[String]): LoadResult =
+    raw match {
+      case None => LoadResult.Empty
+      case Some(text) =>
+        decode(text) match {
+          case Right(tasks) => LoadResult.Loaded(tasks)
+          case Left(error)  => LoadResult.Unreadable(error)
+        }
+    }
+
+  /** What an incoming `storage` event from another tab means for this one.
+    *
+    * `None` means ignore it. The equality check is not an optimisation, it is
+    * what stops an endless loop: adopting a list makes this tab write it back,
+    * which raises a `storage` event in the tab that sent it, which would adopt
+    * and write again forever. Comparing first means the second tab sees a value
+    * it already holds and stops.
+    */
+  def interpretExternalChange(
+      key: String,
+      newValue: Option[String],
+      current: List[Task]
+  ): Option[List[Task]] =
+    if (key != StorageKey) None
+    else newValue.flatMap(decode(_).toOption).filter(_ != current)
 }
