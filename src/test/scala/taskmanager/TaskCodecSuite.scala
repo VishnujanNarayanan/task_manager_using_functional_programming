@@ -146,6 +146,99 @@ class TaskCodecSuite extends munit.FunSuite {
     assertEquals(ids.last, 4)
   }
 
+  // --- interpretLoad ---------------------------------------------------
+
+  test("nothing stored is a first visit, not an empty list") {
+    // The caller shows the seed list for Empty and must not for Loaded(Nil).
+    assertEquals(TaskCodec.interpretLoad(None), LoadResult.Empty)
+  }
+
+  test("a readable payload loads") {
+    assertEquals(
+      TaskCodec.interpretLoad(Some(TaskCodec.encode(sample))),
+      LoadResult.Loaded(sample)
+    )
+  }
+
+  test("an empty stored list loads as empty, not as a first visit") {
+    // Somebody who deleted every task must not have the seeds pushed back.
+    assertEquals(
+      TaskCodec.interpretLoad(Some(TaskCodec.encode(Nil))),
+      LoadResult.Loaded(Nil)
+    )
+  }
+
+  test("an undecodable payload reports Unreadable rather than falling back") {
+    // Reporting it is what lets the caller quarantine the bytes before the seed
+    // list overwrites them. Silently returning Empty here is the data loss.
+    TaskCodec.interpretLoad(Some("{ not json")) match {
+      case LoadResult.Unreadable(_) => ()
+      case other => fail(s"expected Unreadable, got: $other")
+    }
+  }
+
+  test("a future version is Unreadable, so its payload is kept") {
+    TaskCodec.interpretLoad(Some("""{"v":99,"tasks":[]}""")) match {
+      case LoadResult.Unreadable(DecodeError.UnsupportedVersion(99)) => ()
+      case other => fail(s"expected Unreadable(UnsupportedVersion(99)), got: $other")
+    }
+  }
+
+  // --- interpretExternalChange ------------------------------------------
+
+  test("another tab's write to our key is adopted") {
+    assertEquals(
+      TaskCodec.interpretExternalChange(TaskCodec.StorageKey, Some(TaskCodec.encode(sample)), Nil),
+      Some(sample)
+    )
+  }
+
+  test("a write to somebody else's key is ignored") {
+    assertEquals(
+      TaskCodec.interpretExternalChange("some.other.app", Some(TaskCodec.encode(sample)), Nil),
+      None
+    )
+  }
+
+  test("a value we already hold is ignored, which is what breaks the loop") {
+    // Adopting makes this tab write, which raises an event in the tab that sent
+    // it. Without this check the two tabs write to each other forever.
+    assertEquals(
+      TaskCodec.interpretExternalChange(TaskCodec.StorageKey, Some(TaskCodec.encode(sample)), sample),
+      None
+    )
+  }
+
+  test("a cleared key is ignored rather than wiping this tab") {
+    assertEquals(TaskCodec.interpretExternalChange(TaskCodec.StorageKey, None, sample), None)
+  }
+
+  test("an undecodable value from another tab is ignored, not adopted") {
+    assertEquals(
+      TaskCodec.interpretExternalChange(TaskCodec.StorageKey, Some("garbage"), sample),
+      None
+    )
+  }
+
+  test("adopting another tab's work stops it being clobbered") {
+    // The regression: two tabs each hold their own list and stamp the whole
+    // thing over the key, so a tab that never saw a task added elsewhere
+    // deletes it on its next write.
+    val shared  = sample
+    val tabAdds = Main.addTask(shared, "added in tab A", TaskDate(2026, 8, 15),
+                               TaskTime(12, 0), Priority.Low, TaskCodec.nextId(shared))
+
+    // Tab B is still holding the old list when the event arrives.
+    val adopted = TaskCodec
+      .interpretExternalChange(TaskCodec.StorageKey, Some(TaskCodec.encode(tabAdds)), shared)
+      .getOrElse(fail("tab B should have adopted tab A's list"))
+
+    // Tab B now edits and writes. Tab A's task must survive that write.
+    val afterTabB = Main.toggleTask(adopted, 1)
+    assert(afterTabB.exists(_.title == "added in tab A"), "tab A's task was clobbered")
+    assertEquals(afterTabB.length, sample.length + 1)
+  }
+
   test("toggling after a reload affects exactly one task") {
     val stored = TaskCodec.decode(TaskCodec.encode(sample)).getOrElse(Nil)
     val added  = Main.addTask(stored, "after reload", TaskDate(2026, 8, 15),

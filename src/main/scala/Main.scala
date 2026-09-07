@@ -52,7 +52,20 @@ object Main {
     Task(2, "Add your first task using the button above", tomorrowDate, TaskTime(10, 0), Priority.Medium, false)
   )
 
-  private val tasksVar = Var(TaskStorage.load().getOrElse(seedTasks))
+  private val loaded = TaskStorage.load()
+
+  private val tasksVar = Var(loaded match {
+    case LoadResult.Loaded(tasks) => tasks
+    case LoadResult.Empty         => seedTasks
+    case LoadResult.Unreadable(_) => seedTasks
+  })
+
+  // Set once, at startup. A failure the visitor is never told about is the same
+  // as a failure that lost their data.
+  private val unreadableVar = Var(loaded match {
+    case LoadResult.Unreadable(_) => true
+    case _                        => false
+  })
 
   private val selectedViewVar = Var(SidebarView.Tasks)
   private val queryVar = Var("")
@@ -142,6 +155,10 @@ object Main {
     }
 
   def main(args: Array[String]): Unit = {
+    // Another tab wrote the list. Adopt it, so this tab's next write extends
+    // that work instead of stamping over it.
+    TaskStorage.onExternalChange(() => tasksVar.now(), tasks => tasksVar.set(tasks))
+
     dom.document.addEventListener("DOMContentLoaded", { (_: dom.Event) =>
       val appContainer = dom.document.getElementById("app")
       render(appContainer, appElement())
@@ -177,6 +194,7 @@ object Main {
       mainTag(cls := "main",
         renderTopBar(),
         div(cls := "content",
+          renderUnreadableNotice(),
           renderStatGrid(summarySignal),
           div(cls := "columns",
             div(cls := "col-main",
@@ -279,6 +297,31 @@ object Main {
       )
     )
   }
+
+  /** Shown when startup found a payload it could not decode. The tasks are not
+    * lost -- they were moved aside before the seed list could overwrite them --
+    * so the notice says where they went rather than just apologising.
+    */
+  def renderUnreadableNotice(): HtmlElement =
+    div(
+      cls := "notice",
+      display <-- unreadableVar.signal.map(if (_) "flex" else "none"),
+      role := "status",
+      div(cls := "notice-body",
+        div(cls := "notice-title", "Saved tasks could not be read"),
+        p(cls := "notice-text",
+          s"They were kept under the browser storage key ${TaskStorage.QuarantineKey} " +
+            "and this list started fresh. Nothing was deleted."
+        )
+      ),
+      button(
+        typ := "button",
+        cls := "notice-dismiss",
+        aria.label := "Dismiss",
+        onClick --> { _ => unreadableVar.set(false) },
+        "×"
+      )
+    )
 
   def renderStatGrid(summarySignal: Signal[Summary]): HtmlElement =
     sectionTag(cls := "stat-grid",

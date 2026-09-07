@@ -955,3 +955,53 @@ select:hover, input[type="date"]:hover, input[type="time"]:hover {
 
     .nav-item { min-height: 44px; }
 }
+
+/* ---- Unreadable-payload notice -------------------------------------- */
+/* Shown only when startup found stored tasks it could not decode. Uses the
+   high-priority wash rather than a new colour, so it reads as "attention"
+   without introducing a token that exists for one element. */
+
+.notice {
+    display: none;              /* Laminar flips this to flex when it applies */
+    align-items: flex-start;
+    gap: var(--s3);
+    margin-bottom: var(--s4);
+    padding: var(--s3) var(--s4);
+    border: 1px solid var(--prio-high);
+    border-radius: var(--r-lg);
+    background: var(--high-wash);
+    color: var(--ink);
+}
+
+.notice-body { flex: 1; min-width: 0; }
+
+.notice-title {
+    font-size: var(--t-base);
+    font-weight: 600;
+    margin-bottom: var(--s1);
+}
+
+.notice-text {
+    font-size: var(--t-sm);
+    color: var(--muted);
+    line-height: 1.5;
+    overflow-wrap: anywhere;    /* the storage key is a long unbroken token */
+}
+
+.notice-dismiss {
+    flex: none;
+    width: 32px;
+    height: 32px;               /* keeps the 32px touch target used elsewhere */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--r);
+    background: transparent;
+    color: var(--muted);
+    font-size: var(--t-md);
+    line-height: 1;
+    cursor: pointer;
+}
+
+.notice-dismiss:hover { background: rgba(0, 0, 0, 0.06); color: var(--ink); }
